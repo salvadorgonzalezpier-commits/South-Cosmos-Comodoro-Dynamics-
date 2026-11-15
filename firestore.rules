@@ -1,0 +1,184 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(uid) {
+      return isVerified() && request.auth.uid == uid;
+    }
+
+    function isTokenAdmin() {
+      return isVerified() && request.auth.token.email == 'salvador.gonzalez.pier@gmail.com';
+    }
+
+    function isAdmin() {
+      return isTokenAdmin() || (
+        isVerified() && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'displayName', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'displayName', 'createdAt', 'updatedAt'])
+        && data.uid is string && data.uid == userId && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 256
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidWhitelistDomain(data, domainId) {
+      return data.keys().hasAll(['id', 'domain', 'label', 'category', 'active', 'ownerUid', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'domain', 'label', 'category', 'active', 'ownerUid', 'createdAt', 'updatedAt'])
+        && data.id is string && data.id == domainId && isValidId(data.id)
+        && data.domain is string && data.domain.size() >= 3 && data.domain.size() <= 160
+        && data.label is string && data.label.size() >= 1 && data.label.size() <= 120
+        && data.category is string && data.category in ['NASA', 'PDS', 'ESA', 'USGS', 'NOAA', 'Oficial']
+        && data.active is bool
+        && data.ownerUid is string && isValidId(data.ownerUid)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidKnowledgeEntry(data, entryId) {
+      return data.keys().hasAll([
+          'id', 'ownerUid', 'tipo', 'sitio', 'sourceUrl', 'sourceDomain',
+          'whitelisted', 'autoApproved', 'verifiedBySearch', 'verificationSummary',
+          'status', 'temperatura', 'presion', 'viento', 'luz', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'ownerUid', 'tipo', 'sitio', 'sourceUrl', 'sourceDomain',
+          'whitelisted', 'autoApproved', 'verifiedBySearch', 'verificationSummary',
+          'status', 'temperatura', 'presion', 'viento', 'luz', 'createdAt', 'updatedAt'
+        ])
+        && data.id is string && data.id == entryId && isValidId(data.id)
+        && data.ownerUid is string && isValidId(data.ownerUid)
+        && data.tipo is string && data.tipo in ['clima', 'similitud']
+        && data.sitio is string && data.sitio.size() >= 1 && data.sitio.size() <= 140
+        && data.sourceUrl is string && data.sourceUrl.size() >= 1 && data.sourceUrl.size() <= 500
+        && data.sourceDomain is string && data.sourceDomain.size() >= 3 && data.sourceDomain.size() <= 160
+        && data.whitelisted is bool
+        && data.autoApproved is bool
+        && data.verifiedBySearch is bool
+        && data.verificationSummary is string && data.verificationSummary.size() <= 1200
+        && data.status is string && data.status in ['aprobado', 'pendiente', 'rechazado']
+        && data.temperatura is number && data.temperatura >= 0 && data.temperatura <= 1000
+        && data.presion is number && data.presion >= 0 && data.presion <= 10000000
+        && data.viento is number && data.viento >= 0 && data.viento <= 150
+        && data.luz is number && data.luz >= 0 && data.luz <= 1500
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdmin(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'email', 'createdAt'])
+        && data.uid is string && data.uid == userId && isValidId(data.uid)
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 256
+        && data.createdAt is timestamp;
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isTokenAdmin();
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && (isOwner(userId) || isAdmin())
+        && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'email', 'updatedAt']);
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+
+    match /whitelistDomains/{domainId} {
+      allow get: if isValidId(domainId) && isVerified() && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerUid == request.auth.uid || isTokenAdmin());
+      allow create: if isValidId(domainId)
+        && isVerified()
+        && isValidWhitelistDomain(incoming(), domainId)
+        && incoming().ownerUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(domainId)
+        && isVerified()
+        && (existing().ownerUid == request.auth.uid || isAdmin())
+        && isValidWhitelistDomain(incoming(), domainId)
+        && incoming().id == existing().id
+        && incoming().ownerUid == existing().ownerUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['active', 'label', 'category', 'updatedAt']);
+      allow delete: if isValidId(domainId)
+        && isVerified()
+        && (existing().ownerUid == request.auth.uid || isAdmin());
+    }
+
+    match /knowledgeEntries/{entryId} {
+      allow get: if isValidId(entryId) && isVerified() && (existing().ownerUid == request.auth.uid || isAdmin());
+      allow list: if isVerified() && (resource.data.ownerUid == request.auth.uid || isTokenAdmin());
+      allow create: if isValidId(entryId)
+        && isVerified()
+        && isValidKnowledgeEntry(incoming(), entryId)
+        && incoming().ownerUid == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(entryId)
+        && isVerified()
+        && isValidKnowledgeEntry(incoming(), entryId)
+        && incoming().id == existing().id
+        && incoming().ownerUid == existing().ownerUid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin() ||
+          (
+            existing().ownerUid == request.auth.uid
+            && existing().status != 'rechazado'
+            && incoming().diff(existing()).affectedKeys().hasOnly(['verificationSummary', 'verifiedBySearch', 'updatedAt'])
+          )
+        );
+      allow delete: if isValidId(entryId)
+        && isVerified()
+        && (existing().ownerUid == request.auth.uid || isAdmin());
+    }
+
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isTokenAdmin();
+      allow create: if isValidId(userId) && isAdmin() && isValidAdmin(incoming(), userId) && incoming().createdAt == request.time;
+      allow update: if isValidId(userId) && isAdmin() && isValidAdmin(incoming(), userId) && incoming().createdAt == existing().createdAt;
+      allow delete: if isValidId(userId) && isAdmin();
+    }
+  }
+}

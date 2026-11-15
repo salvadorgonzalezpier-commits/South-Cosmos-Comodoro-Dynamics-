@@ -1,0 +1,6 @@
+{
+  "name": "Análogo Planetario",
+  "description": "Comparador científico de analogía ambiental entre terrenos planetarios (Tierra, Marte y Luna) con series temporales, composición química y penalización por variables críticas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

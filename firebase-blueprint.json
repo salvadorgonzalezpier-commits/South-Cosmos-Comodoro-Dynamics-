@@ -1,0 +1,222 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated user profile with isolated email and display metadata.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 3,
+          "maxLength": 256
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "displayName", "createdAt", "updatedAt"]
+    },
+    "WhitelistDomain": {
+      "title": "WhitelistDomain",
+      "description": "Official scientific domain authorized to insert and train models without manual verification.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "category": {
+          "type": "string",
+          "enum": ["NASA", "PDS", "ESA", "USGS", "NOAA", "Oficial"],
+          "maxLength": 20
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "ownerUid": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["id", "domain", "label", "category", "active", "ownerUid", "createdAt", "updatedAt"]
+    },
+    "KnowledgeEntry": {
+      "title": "KnowledgeEntry",
+      "description": "Environmental planetary observation verified via official whitelist or Google Search grounding.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "ownerUid": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "tipo": {
+          "type": "string",
+          "enum": ["clima", "similitud"],
+          "maxLength": 20
+        },
+        "sitio": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140
+        },
+        "sourceUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "sourceDomain": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "whitelisted": {
+          "type": "boolean"
+        },
+        "autoApproved": {
+          "type": "boolean"
+        },
+        "verifiedBySearch": {
+          "type": "boolean"
+        },
+        "verificationSummary": {
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 1200
+        },
+        "status": {
+          "type": "string",
+          "enum": ["aprobado", "pendiente", "rechazado"],
+          "maxLength": 20
+        },
+        "temperatura": {
+          "type": "number"
+        },
+        "presion": {
+          "type": "number"
+        },
+        "viento": {
+          "type": "number"
+        },
+        "luz": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "ownerUid",
+        "tipo",
+        "sitio",
+        "sourceUrl",
+        "sourceDomain",
+        "whitelisted",
+        "autoApproved",
+        "verifiedBySearch",
+        "verificationSummary",
+        "status",
+        "temperatura",
+        "presion",
+        "viento",
+        "luz",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Explicit admin registry keyed by Firebase UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "minLength": 3,
+          "maxLength": 256
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Authenticated user profile isolated per owner UID."
+    },
+    "/whitelistDomains/{domainId}": {
+      "schema": { "$ref": "#/entities/WhitelistDomain" },
+      "description": "User-scoped official scientific domain whitelist entries."
+    },
+    "/knowledgeEntries/{entryId}": {
+      "schema": { "$ref": "#/entities/KnowledgeEntry" },
+      "description": "User-submitted planetary observations with verification and whitelist status."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "System administrator allowlist documents."
+    }
+  }
+}
