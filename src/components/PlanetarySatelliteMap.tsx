@@ -248,7 +248,7 @@ const GooglePlanetaryCanvas: React.FC<
 
   if (status === APILoadingStatus.AUTH_FAILURE || status === APILoadingStatus.FAILED) {
     return (
-      <div className="w-full h-[380px] sm:h-[400px] flex flex-col items-center justify-center p-6 text-center bg-slate-900 text-slate-200 rounded-md border border-slate-200">
+      <div className="w-full h-[380px] sm:h-[400px] flex flex-col items-center justify-center p-6 text-center bg-[#07090E] text-slate-200 rounded-md border border-slate-800">
         <p className="text-xs font-semibold">
           Error inicializando el mapa interactivo de Google Maps Platform
         </p>
@@ -259,7 +259,7 @@ const GooglePlanetaryCanvas: React.FC<
         <button
           type="button"
           onClick={onSwitchToTrek}
-          className="px-3 py-1.5 text-xs font-medium bg-blue-700 text-white rounded hover:bg-blue-800"
+          className="px-3 py-1.5 text-xs font-semibold bg-cyan-400 text-slate-950 rounded hover:bg-cyan-300"
         >
           Cambiar a Mosaico NASA Trek
         </button>
@@ -279,7 +279,7 @@ const GooglePlanetaryCanvas: React.FC<
   return (
     <div className="space-y-2">
       {isPolarClamped && (
-        <div className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-900 flex flex-wrap items-center justify-between gap-2">
+        <div className="px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded text-[11px] text-amber-200 flex flex-wrap items-center justify-between gap-2">
           <span>
             Latitud polar ({lat.toFixed(1)}°): la proyección Web Mercator recorta más allá
             de ±85°.
@@ -287,14 +287,14 @@ const GooglePlanetaryCanvas: React.FC<
           <button
             type="button"
             onClick={onSwitchToTrek}
-            className="font-semibold text-amber-950 underline whitespace-nowrap"
+            className="font-semibold text-amber-300 underline whitespace-nowrap"
           >
             Ver polo exacto en NASA Trek
           </button>
         </div>
       )}
 
-      <div className="relative w-full h-[380px] sm:h-[400px] bg-[#0b101b] rounded-md overflow-hidden border border-slate-200">
+      <div className="relative w-full h-[380px] sm:h-[400px] bg-[#07090E] rounded-md overflow-hidden border border-slate-800">
         <GoogleMap
           mapId="DEMO_MAP_ID"
           defaultCenter={{ lat: clampMercatorLat(lat), lng: lon }}
@@ -473,7 +473,7 @@ const NasaTrekMosaicViewer: React.FC<{
             onSelectCoords(Math.max(-89.9, lat - panStepDeg), lon);
         }}
         title="Haz clic sobre el mosaico orbital para centrar coordenadas"
-        className="relative w-full h-[380px] sm:h-[400px] bg-[#0b101b] rounded-md overflow-hidden border border-slate-200 cursor-crosshair select-none"
+        className="relative w-full h-[380px] sm:h-[400px] bg-[#07090E] rounded-md overflow-hidden border border-slate-800 cursor-crosshair select-none"
       >
         <div className="w-full h-full grid grid-cols-3 grid-rows-3">
           {tiles.map((t) =>
@@ -655,15 +655,15 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
     <div className="space-y-2.5">
       {/* Selector de motor y capa */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-md">
+        <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md">
           <button
             type="button"
             disabled={!hasApiKey}
             onClick={() => setEngine('gmaps')}
             className={`px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors disabled:opacity-40 ${
               effectiveEngine === 'gmaps'
-                ? 'bg-white text-blue-800 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Mapa Interactivo (Google Maps)
@@ -673,8 +673,8 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
             onClick={() => setEngine('trek')}
             className={`px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
               effectiveEngine === 'trek'
-                ? 'bg-white text-blue-800 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Mosaico Orbital NASA Trek
@@ -682,7 +682,7 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
         </div>
 
         {effectiveEngine === 'gmaps' ? (
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
             {[
               { z: 2, label: 'Global' },
               { z: 4, label: 'Cuenca' },
@@ -695,8 +695,8 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
                 onClick={() => setGmapsZoom(item.z)}
                 className={`px-2 py-1 text-[11px] font-mono rounded whitespace-nowrap shrink-0 ${
                   gmapsZoom === item.z
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-slate-800 text-slate-100'
+                    : 'text-slate-400 hover:text-slate-100'
                 }`}
               >
                 {item.label}
@@ -704,7 +704,7 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
             ))}
           </div>
         ) : (
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
             {[1, 2, 3, 4, 5, 6, 7]
               .filter((z) => z <= activeTrekMeta.maxZoom)
               .map((z) => (
@@ -714,8 +714,8 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
                   onClick={() => setTrekZoom(z)}
                   className={`px-2 py-1 text-[11px] font-mono rounded whitespace-nowrap shrink-0 ${
                     trekZoom === z
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-slate-800 text-slate-100'
+                      : 'text-slate-400 hover:text-slate-100'
                   }`}
                 >
                   z{z}
@@ -735,8 +735,8 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
                 onClick={() => setGmapsLayerId(layer.id)}
                 className={`px-2.5 py-1 text-[11px] font-medium rounded border whitespace-nowrap shrink-0 transition-colors ${
                   effectiveGmapsLayerId === layer.id
-                    ? 'bg-blue-50 border-blue-300 text-blue-800'
-                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                    : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600'
                 }`}
               >
                 {layer.label}
@@ -752,8 +752,8 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
                 }}
                 className={`px-2.5 py-1 text-[11px] font-medium rounded border whitespace-nowrap shrink-0 transition-colors ${
                   effectiveTrekLayerId === layer.id
-                    ? 'bg-blue-50 border-blue-300 text-blue-800'
-                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                    ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                    : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600'
                 }`}
               >
                 {layer.label}
@@ -790,7 +790,7 @@ export const PlanetarySatelliteMap: React.FC<PlanetarySatelliteMapProps> = (
         />
       )}
 
-      <p className="text-[11px] text-slate-500">
+      <p className="text-[11px] text-slate-400">
         Haz clic en cualquier marcador de sitio calibrado o sobre la superficie para
         inspeccionar imágenes orbitales y productos WUSTL ODE de esa zona.
       </p>

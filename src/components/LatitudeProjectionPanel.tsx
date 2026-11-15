@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import {
   ModoProyeccionLatitud,
@@ -117,8 +117,25 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
   onChangeConfig,
   onResetSitio,
 }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [widthPx, setWidthPx] = useState<number>(640);
+
   const sitioBase = objetivo === 'A' ? sitioA : sitioB;
   const latOrigen = sitioBase.lat ?? 0;
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = Math.floor(el.getBoundingClientRect().width);
+      if (w > 200) setWidthPx(w);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const proyectado = useMemo(
     () =>
@@ -129,8 +146,7 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
     [sitioBase.T, latOrigen, config]
   );
 
-  // Curva latitudinal completa de -90° a +90° para visualización comparativa
-  const { pathLineal, pathSin, areaSin, minY, maxY, xOf, yOf } = useMemo(() => {
+  const curveData = useMemo(() => {
     const lats = Array.from({ length: 73 }, (_, i) => -90 + i * 2.5);
     const valsLin = lats.map((lat) =>
       calcularProyeccionTemperatura(sitioBase.T, latOrigen, {
@@ -160,69 +176,164 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
     lo -= pad;
     hi += pad;
 
-    const W = 640;
-    const H = 210;
-    const mL = 52;
-    const mR = 16;
-    const mT = 16;
-    const mB = 30;
-    const plotW = W - mL - mR;
-    const plotH = H - mT - mB;
-
-    const xFn = (lat: number) => mL + ((lat + 90) / 180) * plotW;
-    const yFn = (tempK: number) => mT + plotH - ((tempK - lo) / (hi - lo)) * plotH;
-
-    const pLin = lats
-      .map(
-        (lat, i) =>
-          `${i === 0 ? 'M' : 'L'}${xFn(lat).toFixed(1)},${yFn(valsLin[i].tMedia).toFixed(1)}`
-      )
-      .join(' ');
-    const pSin = lats
-      .map(
-        (lat, i) =>
-          `${i === 0 ? 'M' : 'L'}${xFn(lat).toFixed(1)},${yFn(valsSin[i].tMedia).toFixed(1)}`
-      )
-      .join(' ');
-
-    const activeSeries = config.modo === 'lineal' ? valsLin : valsSin;
-    const topPts = lats.map(
-      (lat, i) =>
-        `${xFn(lat).toFixed(1)},${yFn(activeSeries[i].tMedia + activeSeries[i].tAmp).toFixed(1)}`
-    );
-    const botPts = [...lats]
-      .reverse()
-      .map((lat, idx) => {
-        const i = lats.length - 1 - idx;
-        return `${xFn(lat).toFixed(1)},${yFn(
-          Math.max(0, activeSeries[i].tMedia - activeSeries[i].tAmp)
-        ).toFixed(1)}`;
-      });
-    const band = `M${topPts.join(' L')} L${botPts.join(' L')} Z`;
-
-    return {
-      pathLineal: pLin,
-      pathSin: pSin,
-      areaSin: band,
-      minY: lo,
-      maxY: hi,
-      xOf: xFn,
-      yOf: yFn,
-    };
+    return { lats, valsLin, valsSin, minY: lo, maxY: hi };
   }, [sitioBase.T, latOrigen, config]);
 
-  const W = 640;
-  const H = 210;
-  const mL = 52;
+  const H = 224;
+  const mL = 54;
   const mR = 16;
   const mT = 16;
   const mB = 30;
+  const plotW = Math.max(80, widthPx - mL - mR);
+  const plotH = H - mT - mB;
 
-  const handleSvgClick = (e: React.MouseEvent<SVGSVGElement>) => {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(widthPx * dpr);
+    canvas.height = Math.round(H * dpr);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { lats, valsLin, valsSin, minY, maxY } = curveData;
+    const xOf = (lat: number) => mL + ((lat + 90) / 180) * plotW;
+    const yOf = (tempK: number) => mT + plotH - ((tempK - minY) / (maxY - minY)) * plotH;
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = '#07090E';
+    ctx.fillRect(0, 0, widthPx, H);
+
+    // Rejilla Y
+    ctx.font = '400 10px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textBaseline = 'middle';
+    for (const f of [0, 0.25, 0.5, 0.75, 1]) {
+      const val = minY + f * (maxY - minY);
+      const y = yOf(val);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(mL, y);
+      ctx.lineTo(widthPx - mR, y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748B';
+      ctx.textAlign = 'right';
+      ctx.fillText(`${val.toFixed(0)} K`, mL - 8, y);
+    }
+
+    // Rejilla X
+    ctx.textBaseline = 'alphabetic';
+    for (const lat of [-90, -45, 0, 45, 90]) {
+      const x = xOf(lat);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(x, mT);
+      ctx.lineTo(x, H - mB);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748B';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${lat}°`, x, H - 10);
+    }
+
+    ctx.strokeStyle = '#1E293B';
+    ctx.strokeRect(mL, mT, plotW, plotH);
+
+    // Banda diaria del modelo activo
+    const activeSeries = config.modo === 'lineal' ? valsLin : valsSin;
+    ctx.beginPath();
+    lats.forEach((lat, i) => {
+      const x = xOf(lat);
+      const y = yOf(activeSeries[i].tMedia + activeSeries[i].tAmp);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    for (let i = lats.length - 1; i >= 0; i--) {
+      const x = xOf(lats[i]);
+      const y = yOf(Math.max(0, activeSeries[i].tMedia - activeSeries[i].tAmp));
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.12)';
+    ctx.fill();
+
+    // Curva de referencia discontinua
+    const refSeries = config.modo === 'lineal' ? valsSin : valsLin;
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    lats.forEach((lat, i) => {
+      const x = xOf(lat);
+      const y = yOf(refSeries[i].tMedia);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = '#64748B';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.restore();
+
+    // Curva principal cian
+    ctx.beginPath();
+    lats.forEach((lat, i) => {
+      const x = xOf(lat);
+      const y = yOf(activeSeries[i].tMedia);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = '#06B6D4';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Latitud origen
+    const x0 = xOf(latOrigen);
+    const y0 = yOf(sitioBase.T[0]);
+    ctx.save();
+    ctx.setLineDash([2, 2]);
+    ctx.strokeStyle = '#94A3B8';
+    ctx.beginPath();
+    ctx.moveTo(x0, mT);
+    ctx.lineTo(x0, H - mB);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = '#07090E';
+    ctx.beginPath();
+    ctx.arc(x0, y0, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#94A3B8';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    // Latitud destino
+    const x1 = xOf(config.latDestino);
+    const y1 = yOf(proyectado.tMedia);
+    ctx.strokeStyle = config.activa ? '#F59E0B' : '#64748B';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x1, mT);
+    ctx.lineTo(x1, H - mB);
+    ctx.stroke();
+
+    ctx.fillStyle = config.activa ? '#F59E0B' : '#94A3B8';
+    ctx.beginPath();
+    ctx.arc(x1, y1, 5.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#07090E';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.restore();
+  }, [curveData, widthPx, config, latOrigen, sitioBase.T, proyectado.tMedia, plotW, plotH]);
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const relX = ((e.clientX - rect.left) / rect.width) * W;
-    const clampedX = Math.max(mL, Math.min(W - mR, relX));
-    const frac = (clampedX - mL) / (W - mL - mR);
+    const relX = e.clientX - rect.left;
+    const clampedX = Math.max(mL, Math.min(widthPx - mR, relX));
+    const frac = (clampedX - mL) / plotW;
     const newLat = Math.round((frac * 180 - 90) * 2) / 2;
     onChangeConfig({
       ...config,
@@ -239,26 +350,19 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
     });
   };
 
-  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
-    const val = minY + f * (maxY - minY);
-    return { y: yOf(val), label: `${val.toFixed(0)} K` };
-  });
-
-  const xTicks = [-90, -45, 0, 45, 90];
-
   return (
     <section
       id="proyeccion-latitud"
-      className="bg-white border border-slate-200 rounded-lg overflow-hidden"
+      className="bg-[#0D121D] border border-slate-800 rounded-lg overflow-hidden"
     >
-      <div className="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+      <div className="px-5 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
-            Proyección latitudinal de temperatura
+          <h2 className="text-base font-semibold text-slate-100">
+            Proyección Latitudinal de Temperatura (Canvas)
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Simula el traslado de un terreno a otra latitud (modelo lineal o
-            sinusoidal) y actualiza automáticamente la comparación
+            sinusoidal) y actualiza el motor de comparación
           </p>
         </div>
 
@@ -271,10 +375,10 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                 activa: !config.activa,
               })
             }
-            className={`px-3 py-1.5 text-xs font-medium rounded-md border whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-md border whitespace-nowrap shrink-0 transition-colors ${
               config.activa
-                ? 'bg-blue-50 border-blue-300 text-blue-800'
-                : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-100'
             }`}
           >
             {config.activa ? 'Proyección activa en modelo' : 'Activar proyección'}
@@ -283,30 +387,30 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
           <button
             type="button"
             onClick={onResetSitio}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-md hover:bg-slate-50 whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-950 border border-slate-800 rounded-md hover:bg-slate-900 whitespace-nowrap shrink-0"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+            <RotateCcw className="w-3.5 h-3.5 text-slate-400" />
             Latitud original
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-200">
+      <div className="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-800">
         {/* Controles de proyección */}
         <div className="xl:col-span-5 p-5 space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <span className="block text-[11px] font-medium text-slate-600 mb-1">
+              <span className="block text-[11px] font-medium text-slate-400 mb-1">
                 Sitio a trasladar
               </span>
-              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-md">
+              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md">
                 <button
                   type="button"
                   onClick={() => onChangeObjetivo('A')}
                   className={`px-2 py-1 text-xs font-medium rounded truncate ${
                     objetivo === 'A'
-                      ? 'bg-white text-blue-700 shadow-xs'
-                      : 'text-slate-600'
+                      ? 'bg-cyan-500/20 text-cyan-300'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   Sitio A
@@ -316,8 +420,8 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                   onClick={() => onChangeObjetivo('B')}
                   className={`px-2 py-1 text-xs font-medium rounded truncate ${
                     objetivo === 'B'
-                      ? 'bg-white text-amber-700 shadow-xs'
-                      : 'text-slate-600'
+                      ? 'bg-amber-500/20 text-amber-300'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   Sitio B
@@ -326,10 +430,10 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
             </div>
 
             <div>
-              <span className="block text-[11px] font-medium text-slate-600 mb-1">
+              <span className="block text-[11px] font-medium text-slate-400 mb-1">
                 Tipo de proyección
               </span>
-              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 rounded-md">
+              <div className="grid grid-cols-2 gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md">
                 {(['sinusoidal', 'lineal'] as ModoProyeccionLatitud[]).map((m) => (
                   <button
                     key={m}
@@ -337,8 +441,8 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                     onClick={() => updateConfigAutoActivate({ modo: m })}
                     className={`px-2 py-1 text-xs font-medium rounded capitalize ${
                       config.modo === m
-                        ? 'bg-white text-slate-900 shadow-xs'
-                        : 'text-slate-600'
+                        ? 'bg-slate-800 text-slate-100'
+                        : 'text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     {m}
@@ -348,17 +452,16 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
             </div>
           </div>
 
-          <div className="text-xs text-slate-600 flex items-center justify-between border-t border-slate-100 pt-3">
-            <span className="truncate font-medium text-slate-800">{sitioBase.nombre}</span>
-            <span className="font-mono tabular-nums text-slate-500 shrink-0 ml-2">
+          <div className="text-xs text-slate-400 flex items-center justify-between border-t border-slate-800 pt-3">
+            <span className="truncate font-medium text-slate-200">{sitioBase.nombre}</span>
+            <span className="font-mono tabular-nums text-cyan-300 shrink-0 ml-2">
               φ₀ = {latOrigen.toFixed(1)}°
             </span>
           </div>
 
-          {/* Control deslizante y numérico de latitud destino */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <label htmlFor="lat-destino-range" className="font-medium text-slate-700">
+              <label htmlFor="lat-destino-range" className="font-medium text-slate-300">
                 Nueva latitud φ₁ (°)
               </label>
               <input
@@ -373,7 +476,7 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                   })
                 }
                 aria-label="Nueva latitud en grados"
-                className="w-20 px-2 py-1 text-right font-mono tabular-nums text-xs border border-slate-300 rounded"
+                className="w-20 px-2 py-1 text-right font-mono tabular-nums text-xs bg-slate-950 border border-slate-700 text-slate-100 rounded"
               />
             </div>
 
@@ -387,7 +490,7 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
               onChange={(e) =>
                 updateConfigAutoActivate({ latDestino: Number(e.target.value) })
               }
-              className="w-full accent-blue-600"
+              className="w-full accent-cyan-400"
             />
 
             <div className="flex flex-wrap gap-1.5">
@@ -396,7 +499,7 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                   key={p.label}
                   type="button"
                   onClick={() => updateConfigAutoActivate({ latDestino: p.lat })}
-                  className="px-2 py-1 text-[11px] font-mono bg-slate-50 border border-slate-200 rounded hover:bg-slate-100 text-slate-700 whitespace-nowrap"
+                  className="px-2 py-1 text-[11px] font-mono bg-slate-950 border border-slate-800 rounded hover:border-cyan-500/50 text-slate-300 whitespace-nowrap"
                 >
                   {p.label}
                 </button>
@@ -404,13 +507,12 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
             </div>
           </div>
 
-          {/* Parámetro del modelo elegido */}
-          <div className="pt-2 border-t border-slate-100 space-y-2.5 text-xs">
+          <div className="pt-2 border-t border-slate-800 space-y-2.5 text-xs">
             {config.modo === 'lineal' ? (
               <div>
-                <div className="flex items-center justify-between text-slate-600 mb-1">
+                <div className="flex items-center justify-between text-slate-400 mb-1">
                   <label htmlFor="grad-lineal">Gradiente térmico lineal (K / °)</label>
-                  <span className="font-mono tabular-nums text-slate-900">
+                  <span className="font-mono tabular-nums text-slate-100">
                     {config.gradienteLineal.toFixed(2)} K/°
                   </span>
                 </div>
@@ -426,16 +528,16 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                       gradienteLineal: Number(e.target.value),
                     })
                   }
-                  className="w-full accent-blue-600"
+                  className="w-full accent-cyan-400"
                 />
               </div>
             ) : (
               <div>
-                <div className="flex items-center justify-between text-slate-600 mb-1">
+                <div className="flex items-center justify-between text-slate-400 mb-1">
                   <label htmlFor="delta-ep-sin">
                     Contraste ecuador–polo ΔT (cos φ)
                   </label>
-                  <span className="font-mono tabular-nums text-slate-900">
+                  <span className="font-mono tabular-nums text-slate-100">
                     {config.deltaEpSin.toFixed(0)} K
                   </span>
                 </div>
@@ -449,46 +551,46 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
                   onChange={(e) =>
                     updateConfigAutoActivate({ deltaEpSin: Number(e.target.value) })
                   }
-                  className="w-full accent-blue-600"
+                  className="w-full accent-cyan-400"
                 />
               </div>
             )}
 
-            <label className="inline-flex items-center gap-2 text-slate-700 cursor-pointer">
+            <label className="inline-flex items-center gap-2 text-slate-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={config.escalarAmplitud}
                 onChange={(e) =>
                   updateConfigAutoActivate({ escalarAmplitud: e.target.checked })
                 }
-                className="rounded border-slate-300 text-blue-600"
+                className="rounded border-slate-700 bg-slate-950 text-cyan-500"
               />
               <span>Escalar amplitud diaria con la latitud</span>
             </label>
           </div>
         </div>
 
-        {/* Gráfica de perfil latitudinal y resumen numérico */}
+        {/* Gráfica Canvas de perfil latitudinal */}
         <div className="xl:col-span-7 p-5 flex flex-col justify-between space-y-3">
-          <div className="grid grid-cols-3 gap-3 pb-3 border-b border-slate-100 font-mono tabular-nums text-xs">
+          <div className="grid grid-cols-3 gap-3 pb-3 border-b border-slate-800 font-mono tabular-nums text-xs">
             <div>
-              <div className="font-sans text-[11px] text-slate-500">
+              <div className="font-sans text-[11px] text-slate-400">
                 T media proyectada
               </div>
-              <div className="text-base font-semibold text-slate-900 mt-0.5">
+              <div className="text-base font-semibold text-slate-100 mt-0.5">
                 {proyectado.tMedia.toFixed(1)} K{' '}
-                <span className="text-xs font-normal text-slate-500">
+                <span className="text-xs font-normal text-slate-400">
                   ({(proyectado.tMedia - 273.15).toFixed(1)} °C)
                 </span>
               </div>
             </div>
             <div>
-              <div className="font-sans text-[11px] text-slate-500">
+              <div className="font-sans text-[11px] text-slate-400">
                 Desplazamiento ΔT
               </div>
               <div
                 className={`text-base font-semibold mt-0.5 ${
-                  proyectado.deltaMedia >= 0 ? 'text-amber-700' : 'text-blue-700'
+                  proyectado.deltaMedia >= 0 ? 'text-amber-400' : 'text-cyan-400'
                 }`}
               >
                 {proyectado.deltaMedia >= 0 ? '+' : ''}
@@ -496,148 +598,41 @@ export const LatitudeProjectionPanel: React.FC<LatitudeProjectionPanelProps> = (
               </div>
             </div>
             <div>
-              <div className="font-sans text-[11px] text-slate-500">
+              <div className="font-sans text-[11px] text-slate-400">
                 Amplitud diaria A_T
               </div>
-              <div className="text-base font-semibold text-slate-900 mt-0.5">
+              <div className="text-base font-semibold text-slate-100 mt-0.5">
                 ±{proyectado.tAmp.toFixed(1)} K{' '}
-                <span className="text-xs font-normal text-slate-400">
+                <span className="text-xs font-normal text-slate-500">
                   (×{proyectado.factorAmplitud.toFixed(2)})
                 </span>
               </div>
             </div>
           </div>
 
-          <div className="relative">
-            <svg
-              viewBox={`0 0 ${W} ${H}`}
-              onClick={handleSvgClick}
-              className="w-full h-auto cursor-crosshair select-none"
-              role="img"
-              aria-label="Perfil latitudinal de temperatura proyectada"
-            >
-              {yTicks.map((tk, idx) => (
-                <g key={idx}>
-                  <line
-                    x1={mL}
-                    y1={tk.y}
-                    x2={W - mR}
-                    y2={tk.y}
-                    stroke="#F1F5F9"
-                    strokeWidth={1}
-                  />
-                  <text
-                    x={mL - 6}
-                    y={tk.y + 3}
-                    textAnchor="end"
-                    className="fill-slate-500 font-mono text-[10px] tabular-nums"
-                  >
-                    {tk.label}
-                  </text>
-                </g>
-              ))}
+          <div ref={containerRef} className="relative w-full">
+            <canvas
+              ref={canvasRef}
+              onClick={handleCanvasClick}
+              style={{ width: '100%', height: H }}
+              className="block rounded-md border border-slate-800 cursor-crosshair select-none"
+              aria-label="Perfil latitudinal Canvas de temperatura proyectada"
+            />
 
-              {xTicks.map((lat) => (
-                <g key={lat}>
-                  <line
-                    x1={xOf(lat)}
-                    y1={mT}
-                    x2={xOf(lat)}
-                    y2={H - mB}
-                    stroke="#F1F5F9"
-                    strokeWidth={1}
-                  />
-                  <text
-                    x={xOf(lat)}
-                    y={H - 10}
-                    textAnchor="middle"
-                    className="fill-slate-500 font-mono text-[10px] tabular-nums"
-                  >
-                    {lat}°
-                  </text>
-                </g>
-              ))}
-
-              <rect
-                x={mL}
-                y={mT}
-                width={W - mL - mR}
-                height={H - mT - mB}
-                fill="none"
-                stroke="#CBD5E1"
-                strokeWidth={1}
-              />
-
-              {/* Banda de amplitud diaria del modelo activo */}
-              <path d={areaSin} fill="rgba(37, 99, 235, 0.10)" />
-
-              {/* Curva secundaria de referencia */}
-              <path
-                d={config.modo === 'lineal' ? pathSin : pathLineal}
-                fill="none"
-                stroke="#94A3B8"
-                strokeWidth={1.5}
-                strokeDasharray="4 4"
-              />
-
-              {/* Curva activa */}
-              <path
-                d={config.modo === 'lineal' ? pathLineal : pathSin}
-                fill="none"
-                stroke="#2563EB"
-                strokeWidth={2}
-              />
-
-              {/* Marcador de latitud origen φ0 */}
-              <line
-                x1={xOf(latOrigen)}
-                y1={mT}
-                x2={xOf(latOrigen)}
-                y2={H - mB}
-                stroke="#64748B"
-                strokeWidth={1}
-                strokeDasharray="2 2"
-              />
-              <circle
-                cx={xOf(latOrigen)}
-                cy={yOf(sitioBase.T[0])}
-                r={4}
-                fill="#FFFFFF"
-                stroke="#475569"
-                strokeWidth={1.5}
-              />
-
-              {/* Marcador de latitud destino φ1 */}
-              <line
-                x1={xOf(config.latDestino)}
-                y1={mT}
-                x2={xOf(config.latDestino)}
-                y2={H - mB}
-                stroke={config.activa ? '#2563EB' : '#94A3B8'}
-                strokeWidth={1.5}
-              />
-              <circle
-                cx={xOf(config.latDestino)}
-                cy={yOf(proyectado.tMedia)}
-                r={5}
-                fill={config.activa ? '#2563EB' : '#94A3B8'}
-                stroke="#FFFFFF"
-                strokeWidth={1.5}
-              />
-            </svg>
-
-            <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
               <div className="flex items-center gap-4">
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block w-3 h-0.5 bg-blue-600" />
+                  <span className="inline-block w-3 h-0.5 bg-cyan-400" />
                   Modelo activo ({config.modo}) + banda diaria
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block w-3 h-0.5 border-t border-dashed border-slate-400" />
+                  <span className="inline-block w-3 h-0.5 border-t border-dashed border-slate-500" />
                   Referencia ({config.modo === 'lineal' ? 'sinusoidal' : 'lineal'})
                 </span>
               </div>
-              <span className="font-mono">Haz clic en el gráfico para fijar φ₁</span>
+              <span className="font-mono text-amber-400">
+                Haz clic sobre el Canvas para fijar φ₁
+              </span>
             </div>
           </div>
         </div>

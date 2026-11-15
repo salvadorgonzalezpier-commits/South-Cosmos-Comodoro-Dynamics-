@@ -1,8 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import {
-  formatoCientifico,
-  ResultadoComparacion,
-} from '../lib/analogo';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { formatoCientifico, ResultadoComparacion } from '../lib/analogo';
 
 type CanalSerie = 'temperatura' | 'presion' | 'viento' | 'luz';
 
@@ -23,24 +20,31 @@ const CANALES: {
 ];
 
 export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
   const [canal, setCanal] = useState<CanalSerie>('temperatura');
   const [escalaLog, setEscalaLog] = useState<boolean>(true);
   const [probeIdx, setProbeIdx] = useState<number | null>(null);
+  const [widthPx, setWidthPx] = useState<number>(760);
 
   const meta = CANALES.find((c) => c.id === canal)!;
   const usarLog = canal === 'presion' && escalaLog;
 
-  const {
-    yA,
-    yB,
-    minY,
-    maxY,
-    pathA,
-    pathB,
-    ticksY,
-    ticksX,
-    n,
-  } = useMemo(() => {
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = Math.floor(el.getBoundingClientRect().width);
+      if (w > 200) setWidthPx(w);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const computed = useMemo(() => {
     const rawA = resultado.seriesA[canal];
     const rawB = resultado.seriesB[canal];
     const len = rawA.length;
@@ -63,92 +67,179 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) =
       maxVal += pad;
     }
 
-    const W = 760;
-    const H = 260;
-    const mL = 68;
-    const mR = 20;
-    const mT = 18;
-    const mB = 34;
-    const plotW = W - mL - mR;
-    const plotH = H - mT - mB;
-
-    const xOf = (i: number) => mL + (i / Math.max(1, len - 1)) * plotW;
-    const yOf = (val: number) =>
-      mT + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
-
-    const buildPath = (arr: number[]) =>
-      arr
-        .map((v, i) => `${i === 0 ? 'M' : 'L'}${xOf(i).toFixed(1)},${yOf(v).toFixed(1)}`)
-        .join(' ');
-
-    const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
-      const val = minVal + f * (maxVal - minVal);
-      const displayVal = usarLog ? Math.pow(10, val) : val;
-      return {
-        y: yOf(val),
-        label: usarLog
-          ? `10^${val.toFixed(1)}`
-          : formatoCientifico(displayVal, meta.unidad),
-      };
-    });
-
-    const xTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => {
-      const idx = Math.round(f * (len - 1));
-      const label =
-        resultado.modo === 'ciclo'
-          ? `${Math.round(f * 100)}%`
-          : `${resultado.seriesA.t[idx]?.toFixed(0) ?? 0} h`;
-      return {
-        x: xOf(idx),
-        label,
-      };
-    });
-
     return {
       yA: rawA,
       yB: rawB,
+      valsA,
+      valsB,
       minY: minVal,
       maxY: maxVal,
-      pathA: buildPath(valsA),
-      pathB: buildPath(valsB),
-      ticksY: yTicks,
-      ticksX: xTicks,
       n: len,
     };
-  }, [resultado, canal, usarLog, meta.unidad]);
+  }, [resultado, canal, usarLog]);
 
-  const W = 760;
-  const H = 260;
+  const H = 264;
   const mL = 68;
   const mR = 20;
   const mT = 18;
   const mB = 34;
-  const plotW = W - mL - mR;
+  const plotW = Math.max(80, widthPx - mL - mR);
   const plotH = H - mT - mB;
 
-  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(widthPx * dpr);
+    canvas.height = Math.round(H * dpr);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { valsA, valsB, minY, maxY, n } = computed;
+    const xOf = (i: number) => mL + (i / Math.max(1, n - 1)) * plotW;
+    const yOf = (val: number) =>
+      mT + plotH - ((val - minY) / (maxY - minY)) * plotH;
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    ctx.fillStyle = '#07090E';
+    ctx.fillRect(0, 0, widthPx, H);
+
+    // Rejilla horizontal y etiquetas Y
+    ctx.font = '400 10px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textBaseline = 'middle';
+    for (const f of [0, 0.25, 0.5, 0.75, 1]) {
+      const val = minY + f * (maxY - minY);
+      const y = yOf(val);
+      const displayVal = usarLog ? Math.pow(10, val) : val;
+      const label = usarLog
+        ? `10^${val.toFixed(1)}`
+        : formatoCientifico(displayVal, meta.unidad);
+
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(mL, y);
+      ctx.lineTo(widthPx - mR, y);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748B';
+      ctx.textAlign = 'right';
+      ctx.fillText(label, mL - 8, y);
+    }
+
+    // Rejilla vertical y etiquetas X
+    ctx.textBaseline = 'alphabetic';
+    for (const f of [0, 0.25, 0.5, 0.75, 1]) {
+      const idx = Math.round(f * (n - 1));
+      const x = xOf(idx);
+      const label =
+        resultado.modo === 'ciclo'
+          ? `${Math.round(f * 100)}%`
+          : `${resultado.seriesA.t[idx]?.toFixed(0) ?? 0} h`;
+
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(x, mT);
+      ctx.lineTo(x, H - mB);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748B';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, x, H - 12);
+    }
+
+    // Marco
+    ctx.strokeStyle = '#1E293B';
+    ctx.strokeRect(mL, mT, plotW, plotH);
+
+    // Área sutil bajo curva A
+    ctx.beginPath();
+    valsA.forEach((v, i) => {
+      const px = xOf(i);
+      const py = yOf(v);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.lineTo(xOf(n - 1), mT + plotH);
+    ctx.lineTo(xOf(0), mT + plotH);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.08)';
+    ctx.fill();
+
+    // Curva Sitio A (Cian sólida)
+    ctx.beginPath();
+    valsA.forEach((v, i) => {
+      const px = xOf(i);
+      const py = yOf(v);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.strokeStyle = '#06B6D4';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    // Curva Sitio B (Ámbar discontinua)
+    ctx.save();
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    valsB.forEach((v, i) => {
+      const px = xOf(i);
+      const py = yOf(v);
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    });
+    ctx.strokeStyle = '#F59E0B';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    // Sonda interactiva
+    if (probeIdx !== null) {
+      const px = xOf(probeIdx);
+      const pyA = yOf(valsA[probeIdx]);
+      const pyB = yOf(valsB[probeIdx]);
+
+      ctx.save();
+      ctx.setLineDash([3, 3]);
+      ctx.strokeStyle = 'rgba(226, 232, 240, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(px, mT);
+      ctx.lineTo(px, H - mB);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.fillStyle = '#06B6D4';
+      ctx.beginPath();
+      ctx.arc(px, pyA, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#07090E';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#F59E0B';
+      ctx.beginPath();
+      ctx.arc(px, pyB, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }, [computed, widthPx, probeIdx, resultado, usarLog, meta.unidad, plotW, plotH]);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const relX = ((e.clientX - rect.left) / rect.width) * W;
-    const clamped = Math.max(mL, Math.min(W - mR, relX));
+    const relX = e.clientX - rect.left;
+    const clamped = Math.max(mL, Math.min(widthPx - mR, relX));
     const frac = (clamped - mL) / plotW;
-    const idx = Math.round(frac * (n - 1));
-    setProbeIdx(Math.max(0, Math.min(n - 1, idx)));
+    const idx = Math.round(frac * (computed.n - 1));
+    setProbeIdx(Math.max(0, Math.min(computed.n - 1, idx)));
   };
-
-  const probeX =
-    probeIdx !== null ? mL + (probeIdx / Math.max(1, n - 1)) * plotW : null;
-
-  const transformVal = (v: number) =>
-    usarLog ? Math.log10(Math.max(v, 1e-12)) : v;
-
-  const probeYA =
-    probeIdx !== null
-      ? mT + plotH - ((transformVal(yA[probeIdx]) - minY) / (maxY - minY)) * plotH
-      : null;
-  const probeYB =
-    probeIdx !== null
-      ? mT + plotH - ((transformVal(yB[probeIdx]) - minY) / (maxY - minY)) * plotH
-      : null;
 
   const correlacion = resultado.correlacionTemporal[canal];
   const similitud = resultado.porVariable[canal];
@@ -156,14 +247,14 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) =
   return (
     <section
       id="series-temporales"
-      className="bg-white border border-slate-200 rounded-lg p-5"
+      className="bg-[#0D121D] border border-slate-800 rounded-lg p-5"
     >
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-800">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
-            Series temporales comparadas
+          <h2 className="text-base font-semibold text-slate-100">
+            Osciloscopio Canvas de Series Temporales
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             {resultado.modo === 'ciclo'
               ? 'Eje horizontal normalizado al día local completo de cada cuerpo (0–100%)'
               : `Ventana absoluta (${resultado.ventana[0]} h – ${resultado.ventana[1]} h) · ${resultado.n} muestras`}
@@ -171,16 +262,16 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) =
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-md">
+          <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md">
             {CANALES.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setCanal(c.id)}
-                className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+                className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                   canal === c.id
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'text-slate-400 hover:text-slate-100'
                 }`}
               >
                 {c.titulo}
@@ -192,10 +283,10 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) =
             <button
               type="button"
               onClick={() => setEscalaLog((prev) => !prev)}
-              className={`px-3 py-1.5 text-xs font-mono rounded-md border whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+              className={`px-3 py-1.5 text-xs font-mono rounded-md border whitespace-nowrap shrink-0 transition-colors ${
                 escalaLog
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-white border-slate-200 text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
+                  : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-100'
               }`}
             >
               {escalaLog ? 'Escala log₁₀' : 'Escala lineal'}
@@ -208,27 +299,27 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) =
       <div className="flex flex-wrap items-center justify-between gap-4 py-3 text-xs">
         <div className="flex flex-wrap items-center gap-5">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-4 h-0.5 bg-blue-600" aria-hidden="true" />
-            <span className="font-medium text-slate-800">{resultado.sitioA}</span>
+            <span className="inline-block w-4 h-0.5 bg-cyan-400" aria-hidden="true" />
+            <span className="font-medium text-slate-200">{resultado.sitioA}</span>
           </div>
           <div className="flex items-center gap-2">
             <span
-              className="inline-block w-4 h-0.5 border-t-2 border-dashed border-amber-600"
+              className="inline-block w-4 h-0.5 border-t-2 border-dashed border-amber-400"
               aria-hidden="true"
             />
-            <span className="font-medium text-slate-800">{resultado.sitioB}</span>
+            <span className="font-medium text-slate-200">{resultado.sitioB}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 font-mono tabular-nums text-slate-600">
+        <div className="flex items-center gap-4 font-mono tabular-nums text-slate-400">
           <span>
             Similitud Wasserstein:{' '}
-            <strong className="text-slate-900">{similitud.toFixed(1)}%</strong>
+            <strong className="text-cyan-300">{similitud.toFixed(1)}%</strong>
           </span>
           <span>·</span>
           <span>
             Forma temporal (r):{' '}
-            <strong className="text-slate-900">
+            <strong className="text-slate-100">
               {correlacion !== null
                 ? `${correlacion >= 0 ? '+' : ''}${correlacion.toFixed(2)}`
                 : 'N/A (constante)'}
@@ -237,127 +328,36 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({ resultado }) =
         </div>
       </div>
 
-      {/* Lienzo SVG con sonda interactiva */}
-      <div className="relative">
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          className="w-full h-auto cursor-crosshair select-none"
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => setProbeIdx(null)}
-          role="img"
-          aria-label={`Serie temporal de ${meta.titulo}`}
-        >
-          {/* Rejilla horizontal */}
-          {ticksY.map((tk, idx) => (
-            <g key={idx}>
-              <line
-                x1={mL}
-                y1={tk.y}
-                x2={W - mR}
-                y2={tk.y}
-                stroke="#F1F5F9"
-                strokeWidth={1}
-              />
-              <text
-                x={mL - 8}
-                y={tk.y + 3}
-                textAnchor="end"
-                className="fill-slate-500 font-mono text-[10px] tabular-nums"
-              >
-                {tk.label}
-              </text>
-            </g>
-          ))}
+      <div ref={containerRef} className="relative w-full">
+        <canvas
+          ref={canvasRef}
+          onPointerMove={handlePointerMove}
+          onPointerLeave={() => setProbeIdx(null)}
+          style={{ width: '100%', height: H }}
+          className="block rounded-md border border-slate-800 cursor-crosshair select-none"
+          aria-label={`Osciloscopio Canvas de ${meta.titulo}`}
+        />
 
-          {/* Rejilla vertical y eje X */}
-          {ticksX.map((tk, idx) => (
-            <g key={idx}>
-              <line
-                x1={tk.x}
-                y1={mT}
-                x2={tk.x}
-                y2={H - mB}
-                stroke="#F1F5F9"
-                strokeWidth={1}
-              />
-              <text
-                x={tk.x}
-                y={H - 12}
-                textAnchor="middle"
-                className="fill-slate-500 font-mono text-[10px] tabular-nums"
-              >
-                {tk.label}
-              </text>
-            </g>
-          ))}
-
-          {/* Marco de ejes */}
-          <rect
-            x={mL}
-            y={mT}
-            width={plotW}
-            height={plotH}
-            fill="none"
-            stroke="#CBD5E1"
-            strokeWidth={1}
-          />
-
-          {/* Curvas */}
-          <path
-            d={pathA}
-            fill="none"
-            stroke="#2563EB"
-            strokeWidth={2}
-            strokeLinejoin="round"
-          />
-          <path
-            d={pathB}
-            fill="none"
-            stroke="#D97706"
-            strokeWidth={2}
-            strokeDasharray="6 4"
-            strokeLinejoin="round"
-          />
-
-          {/* Sonda interactiva */}
-          {probeIdx !== null && probeX !== null && probeYA !== null && probeYB !== null && (
-            <g>
-              <line
-                x1={probeX}
-                y1={mT}
-                x2={probeX}
-                y2={H - mB}
-                stroke="#64748B"
-                strokeWidth={1}
-                strokeDasharray="3 3"
-              />
-              <circle cx={probeX} cy={probeYA} r={4} fill="#2563EB" stroke="#fff" strokeWidth={1.5} />
-              <circle cx={probeX} cy={probeYB} r={4} fill="#D97706" stroke="#fff" strokeWidth={1.5} />
-            </g>
-          )}
-        </svg>
-
-        {/* HUD numérico de la sonda */}
-        <div className="mt-2 min-h-[28px] px-3 py-1.5 bg-slate-50 border border-slate-200 rounded text-xs font-mono tabular-nums flex flex-wrap items-center justify-between gap-3 text-slate-700">
+        <div className="mt-2 min-h-[30px] px-3 py-1.5 bg-slate-950 border border-slate-800 rounded text-xs font-mono tabular-nums flex flex-wrap items-center justify-between gap-3 text-slate-300">
           {probeIdx !== null ? (
             <>
               <span>
                 {resultado.modo === 'ciclo'
-                  ? `Ciclo: ${((probeIdx / Math.max(1, n - 1)) * 100).toFixed(1)}% (A: ${resultado.seriesA.t[probeIdx].toFixed(1)} h · B: ${resultado.seriesB.t[probeIdx].toFixed(1)} h)`
+                  ? `Ciclo: ${((probeIdx / Math.max(1, computed.n - 1)) * 100).toFixed(1)}% (A: ${resultado.seriesA.t[probeIdx].toFixed(1)} h · B: ${resultado.seriesB.t[probeIdx].toFixed(1)} h)`
                   : `t = ${resultado.seriesA.t[probeIdx].toFixed(2)} h`}
               </span>
               <div className="flex flex-wrap items-center gap-4">
-                <span className="text-blue-700">
-                  A: {formatoCientifico(yA[probeIdx], meta.unidad)} {meta.unidad}
+                <span className="text-cyan-400">
+                  A: {formatoCientifico(computed.yA[probeIdx], meta.unidad)} {meta.unidad}
                 </span>
-                <span className="text-amber-700">
-                  B: {formatoCientifico(yB[probeIdx], meta.unidad)} {meta.unidad}
+                <span className="text-amber-400">
+                  B: {formatoCientifico(computed.yB[probeIdx], meta.unidad)} {meta.unidad}
                 </span>
               </div>
             </>
           ) : (
-            <span className="text-slate-400">
-              Desliza el cursor sobre la gráfica para inspeccionar coordenadas exactas (t, y)
+            <span className="text-slate-500">
+              Desliza el cursor sobre el lienzo Canvas para inspeccionar coordenadas exactas (t, y)
             </span>
           )}
         </div>

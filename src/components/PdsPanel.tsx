@@ -223,30 +223,30 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
   return (
     <section
       id="pds-planetario"
-      className="bg-white border border-slate-200 rounded-lg overflow-hidden"
+      className="bg-[#0D121D] border border-slate-800 rounded-lg overflow-hidden"
     >
       {/* Cabecera PDS Geosciences WUSTL + NASA PDS + Cartografía Planetaria */}
-      <div className="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+      <div className="px-5 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-slate-100">
             Mapeo satelital de Luna y Marte: NASA PDS, WUSTL & Moon/Mars Trek
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Cartografía interactiva (Clementine, Apollo, LRO WAC/LOLA, Viking, MOLA,
             OpenPlanetary), productos ODE (
-            <span className="font-mono">pds-geosciences.wustl.edu</span>) y catálogo
-            PDS4 (<span className="font-mono">pds.nasa.gov</span>)
+            <span className="font-mono text-slate-300">pds-geosciences.wustl.edu</span>) y catálogo
+            PDS4 (<span className="font-mono text-slate-300">pds.nasa.gov</span>)
           </p>
         </div>
 
-        <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-md">
+        <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md">
           <button
             type="button"
             onClick={() => handleCambiarCuerpo('luna')}
-            className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+            className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
               cuerpo === 'luna'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Luna (LRO · Clementine)
@@ -254,10 +254,10 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
           <button
             type="button"
             onClick={() => handleCambiarCuerpo('marte')}
-            className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+            className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
               cuerpo === 'marte'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                : 'text-slate-400 hover:text-slate-100'
             }`}
           >
             Marte (Viking · MOLA · PDS)
@@ -266,12 +266,12 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
       </div>
 
       {/* Selector de ubicaciones calibradas PDS y coordenadas planetarias */}
-      <div className="px-5 py-4 bg-slate-50/70 border-b border-slate-200 space-y-3">
+      <div className="px-5 py-4 bg-[#0B0E17] border-b border-slate-800 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <label
               htmlFor="select-pds-preset"
-              className="text-xs font-medium text-slate-600 whitespace-nowrap"
+              className="text-xs font-medium text-slate-400 whitespace-nowrap"
             >
               Sitios calibrados ({cuerpo === 'luna' ? 'Luna' : 'Marte'} ·{' '}
               {presetsCuerpo.length}):
@@ -283,7 +283,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                 const found = presetsCuerpo.find((p) => p.id === e.target.value);
                 if (found) handleSeleccionarPreset(found);
               }}
-              className="px-2.5 py-1 text-xs bg-white border border-slate-300 rounded text-slate-800 font-medium"
+              className="px-2.5 py-1 text-xs bg-slate-950 border border-slate-700 rounded text-slate-100 font-medium"
             >
               {esPersonalizado && (
                 <option value="">Coordenadas personalizadas en mapa</option>
@@ -296,9 +296,9 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
             </select>
           </div>
 
-          <div className="text-[11px] font-mono text-slate-500">
+          <div className="text-[11px] font-mono text-slate-400">
             Activo en modelo:{' '}
-            <strong className="text-slate-800">
+            <strong className="text-cyan-300">
               {cuerpo === 'luna' ? sitioLunaNombre : sitioMarteNombre}
             </strong>
           </div>
@@ -310,10 +310,10 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
               key={p.id}
               type="button"
               onClick={() => handleSeleccionarPreset(p)}
-              className={`px-2 py-1 text-[11px] font-medium rounded border whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+              className={`px-2 py-1 text-[11px] font-medium rounded border whitespace-nowrap shrink-0 transition-colors ${
                 !esPersonalizado && presetActivo.id === p.id
-                  ? 'bg-blue-50 border-blue-300 text-blue-800'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                  ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                  : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600'
               }`}
             >
               {p.nombre}
@@ -321,7 +321,6 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
           ))}
         </div>
 
-        {/* Selector manual de coordenadas planetarias + ficha resumida */}
         <div className="flex flex-wrap items-end justify-between gap-3 pt-1">
           <form
             onSubmit={handleFormCoordenadas}
@@ -330,7 +329,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
             <div>
               <label
                 htmlFor="pds-lat"
-                className="block text-[11px] font-medium text-slate-600 mb-0.5"
+                className="block text-[11px] font-medium text-slate-400 mb-0.5"
               >
                 Latitud ({cuerpo === 'luna' ? 'Selenográfica' : 'Aerográfica'})
               </label>
@@ -342,13 +341,13 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                 max="89.9"
                 value={latInput}
                 onChange={(e) => setLatInput(e.target.value)}
-                className="w-28 px-2.5 py-1 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded"
+                className="w-28 px-2.5 py-1 text-xs font-mono tabular-nums bg-slate-950 border border-slate-700 text-slate-100 rounded"
               />
             </div>
             <div>
               <label
                 htmlFor="pds-lon"
-                className="block text-[11px] font-medium text-slate-600 mb-0.5"
+                className="block text-[11px] font-medium text-slate-400 mb-0.5"
               >
                 Longitud (°)
               </label>
@@ -360,30 +359,30 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                 max="180"
                 value={lonInput}
                 onChange={(e) => setLonInput(e.target.value)}
-                className="w-28 px-2.5 py-1 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded"
+                className="w-28 px-2.5 py-1 text-xs font-mono tabular-nums bg-slate-950 border border-slate-700 text-slate-100 rounded"
               />
             </div>
             <button
               type="submit"
-              className="px-3 py-1 text-xs font-medium text-white bg-blue-700 rounded hover:bg-blue-800 whitespace-nowrap shrink-0"
+              className="px-3 py-1 text-xs font-medium text-slate-950 bg-cyan-400 rounded hover:bg-cyan-300 whitespace-nowrap shrink-0"
             >
               Centrar zona
             </button>
           </form>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono tabular-nums text-slate-700 bg-white border border-slate-200 rounded px-3 py-1.5">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono tabular-nums text-slate-300 bg-slate-950 border border-slate-800 rounded px-3 py-1.5">
             <span>
               Zona: ({coordLat.toFixed(2)}°, {coordLon.toFixed(2)}°)
             </span>
             {!esPersonalizado && (
               <>
-                <span>·</span>
+                <span className="text-slate-600">·</span>
                 <span>
                   T: {presetActivo.T[0]} ± {presetActivo.T[1]} K
                 </span>
-                <span>·</span>
+                <span className="text-slate-600">·</span>
                 <span>Luz: {presetActivo.luz[0]} W/m²</span>
-                <span>·</span>
+                <span className="text-slate-600">·</span>
                 <span>Pend: {presetActivo.pendiente}°</span>
               </>
             )}
@@ -392,15 +391,14 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
       </div>
 
       {/* Fila principal: Mapa Orbital Interactivo (7 cols) + WUSTL ODE (5 cols) */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-200">
-        {/* Columna 1: Mapeo Satelital y Orbital de Luna / Marte */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-800">
         <div className="xl:col-span-7 p-5 flex flex-col justify-between space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-sm font-semibold text-slate-100">
                 Visor satelital y cartográfico ({cuerpo === 'luna' ? 'Luna' : 'Marte'})
               </h3>
-              <p className="text-[11px] font-mono tabular-nums text-slate-500">
+              <p className="text-[11px] font-mono tabular-nums text-slate-400">
                 {esPersonalizado
                   ? `Zona personalizada (${coordLat.toFixed(3)}°, ${coordLon.toFixed(
                       3
@@ -415,7 +413,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                 href={trekPortalUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
               >
                 Abrir en {cuerpo === 'luna' ? 'Moon Trek' : 'Mars Trek'}
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -428,7 +426,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                 }
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-blue-700 hover:underline whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-cyan-300 hover:underline whitespace-nowrap shrink-0"
               >
                 Portal PDS
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -447,14 +445,13 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
           />
         </div>
 
-        {/* Columna 2: WUSTL PDS Geosciences Node (ODE) */}
         <div className="xl:col-span-5 p-5 flex flex-col space-y-3">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-sm font-semibold text-slate-100">
                 WUSTL Geosciences ODE
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-400">
                 Productos espaciales reales alrededor de ({coordLat.toFixed(2)}°,{' '}
                 {coordLon.toFixed(2)}°)
               </p>
@@ -463,7 +460,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
               href="https://pds-geosciences.wustl.edu/missions/lro/"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
             >
               LRO WUSTL
               <ExternalLink className="w-3.5 h-3.5" />
@@ -479,7 +476,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                 consultarOde(cuerpo, next, coordLat, coordLon);
               }}
               aria-label="Instrumento PDS Geosciences ODE"
-              className="flex-1 px-2.5 py-1.5 text-xs bg-white border border-slate-300 rounded text-slate-800"
+              className="flex-1 px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-700 rounded text-slate-100"
             >
               {INSTRUMENTOS_ODE[cuerpo].map((i) => (
                 <option key={i.id} value={i.id}>
@@ -491,7 +488,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
               type="button"
               onClick={() => consultarOde(cuerpo, instOde, coordLat, coordLon)}
               disabled={cargandoOde}
-              className="p-1.5 border border-slate-200 rounded hover:bg-slate-50 text-slate-700"
+              className="p-1.5 bg-slate-950 border border-slate-700 rounded hover:border-cyan-500/50 text-slate-300"
               title="Actualizar consulta ODE"
             >
               <RefreshCw
@@ -500,23 +497,23 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
             </button>
           </div>
 
-          {errorOde && <div className="text-[11px] text-amber-700">{errorOde}</div>}
+          {errorOde && <div className="text-[11px] text-amber-400">{errorOde}</div>}
 
-          <div className="flex-1 divide-y divide-slate-100 border border-slate-200 rounded-md overflow-hidden">
+          <div className="flex-1 divide-y divide-slate-800 border border-slate-800 bg-[#07090E] rounded-md overflow-hidden">
             {cargandoOde ? (
-              <div className="p-4 text-xs text-slate-500">
+              <div className="p-4 text-xs text-slate-400">
                 Consultando WUSTL PDS ODE...
               </div>
             ) : productosOde.length === 0 ? (
-              <div className="p-4 text-xs text-slate-500">
+              <div className="p-4 text-xs text-slate-400">
                 Sin productos ODE en esa ventana exacta. Prueba otro instrumento o
                 amplía la búsqueda.
               </div>
             ) : (
               productosOde.map((prod) => (
-                <div key={prod.name} className="p-3 space-y-1 hover:bg-slate-50">
+                <div key={prod.name} className="p-3 space-y-1 hover:bg-slate-900/60">
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-mono font-semibold text-slate-900 break-all">
+                    <span className="text-xs font-mono font-semibold text-slate-100 break-all">
                       {prod.name}
                     </span>
                     {prod.labelUrl && (
@@ -524,18 +521,18 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                         href={prod.labelUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[11px] font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+                        className="text-[11px] font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
                       >
                         XML
                       </a>
                     )}
                   </div>
                   {prod.description && (
-                    <p className="text-[11px] text-slate-500 line-clamp-2">
+                    <p className="text-[11px] text-slate-400 line-clamp-2">
                       {prod.description}
                     </p>
                   )}
-                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-slate-500">
                     <span>
                       {prod.mapScale ? `Escala ${prod.mapScale}` : 'Producto PDS'}
                     </span>
@@ -544,7 +541,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                         href={prod.filesUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="font-sans text-blue-700 hover:underline"
+                        className="font-sans text-cyan-400 hover:underline"
                       >
                         Archivos
                       </a>
@@ -558,21 +555,21 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
       </div>
 
       {/* Fila inferior: Catálogo NASA PDS Search (pds.nasa.gov) */}
-      <div className="border-t border-slate-200 p-5 space-y-3 bg-slate-50/40">
+      <div className="border-t border-slate-800 p-5 space-y-3 bg-[#0B0E17]">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900">
+            <h3 className="text-sm font-semibold text-slate-100">
               Catálogo oficial NASA PDS4 ({cuerpo === 'luna' ? 'Moon' : 'Mars'})
             </h3>
-            <p className="text-[11px] text-slate-500">
-              Paquetes de datos indexados en <span className="font-mono">pds.nasa.gov</span>
+            <p className="text-[11px] text-slate-400">
+              Paquetes de datos indexados en <span className="font-mono text-slate-300">pds.nasa.gov</span>
             </p>
           </div>
           <a
             href="https://pds.nasa.gov/"
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
           >
             pds.nasa.gov
             <ExternalLink className="w-3.5 h-3.5" />
@@ -593,26 +590,26 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
               onChange={(e) => setPdsQuery(e.target.value)}
               placeholder="Ej. LRO, Diviner, MSL, REMS, InSight, MOLA..."
               aria-label="Filtrar bundles PDS4"
-              className="w-full pl-3 pr-7 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:border-blue-600"
+              className="w-full pl-3 pr-7 py-1.5 text-xs bg-slate-950 border border-slate-700 text-slate-100 rounded focus:outline-none focus:border-cyan-500"
             />
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-2" />
+            <Search className="w-3.5 h-3.5 text-slate-500 absolute right-2 top-2" />
           </div>
           <button
             type="submit"
             disabled={cargandoPds}
-            className="px-3 py-1.5 text-xs font-medium text-slate-800 bg-white border border-slate-300 rounded hover:bg-slate-100 whitespace-nowrap shrink-0"
+            className="px-3 py-1.5 text-xs font-medium text-slate-100 bg-slate-950 border border-slate-700 rounded hover:border-cyan-500/50 whitespace-nowrap shrink-0"
           >
             {cargandoPds ? 'Buscando...' : 'Buscar PDS4'}
           </button>
-          <span className="text-[11px] font-mono tabular-nums text-slate-500 ml-auto">
+          <span className="text-[11px] font-mono tabular-nums text-slate-400 ml-auto">
             {pdsHits} bundles coincidentes
           </span>
         </form>
 
-        {errorPds && <div className="text-[11px] text-rose-700">{errorPds}</div>}
+        {errorPds && <div className="text-[11px] text-rose-400">{errorPds}</div>}
 
         {bundlesPds.length === 0 && !cargandoPds ? (
-          <div className="p-4 text-xs text-slate-500 bg-white border border-slate-200 rounded-md">
+          <div className="p-4 text-xs text-slate-400 bg-[#07090E] border border-slate-800 rounded-md">
             Sin coincidencias para «{pdsQuery}». Prueba limpiar el filtro para ver
             todos los bundles.
           </div>
@@ -621,14 +618,14 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
             {bundlesPds.map((b) => (
               <div
                 key={b.id}
-                className="p-3 bg-white border border-slate-200 rounded-md space-y-1 hover:border-slate-300 transition-colors"
+                className="p-3 bg-[#07090E] border border-slate-800 rounded-md space-y-1 hover:border-slate-700 transition-colors"
               >
                 <div className="flex items-start justify-between gap-2">
                   <a
                     href={b.pdsUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs font-semibold text-slate-900 hover:text-blue-700 line-clamp-1"
+                    className="text-xs font-semibold text-slate-100 hover:text-cyan-300 line-clamp-1"
                   >
                     {b.title}
                   </a>
@@ -636,7 +633,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                     href={b.pdsUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+                    className="text-[11px] font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
                   >
                     Ver
                   </a>
@@ -645,7 +642,7 @@ export const PdsPanel: React.FC<PdsPanelProps> = ({
                   {b.lid}
                 </div>
                 {b.investigation && (
-                  <div className="text-[11px] text-slate-500 truncate">
+                  <div className="text-[11px] text-slate-400 truncate">
                     {b.investigation} · {b.nodeName}
                   </div>
                 )}

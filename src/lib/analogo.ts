@@ -1302,3 +1302,164 @@ export function formatoCientifico(v: number, unidad?: string): string {
   if (abs >= 1) return v.toFixed(2);
   return v.toFixed(3);
 }
+
+export function sitioDesdePresetTerrestre(p: AnalogoTerrestrePreset): SitioAmbiental {
+  return {
+    id: `earth-${p.id}`,
+    nombre: p.etiquetaSitio,
+    esTierra: true,
+    lat: p.lat,
+    lon: p.lon,
+    fuenteDatos: `NASA Earthdata · ${p.nombre}`,
+    periodo: p.periodo,
+    T: [...p.T],
+    P: [...p.P],
+    viento: [...p.viento],
+    luz: [...p.luz],
+    g: 9.81,
+    radiacion: p.radiacion,
+    aire: { N2: 0.78, O2: 0.21, Ar: 0.0093, CO2: 0.0004, otros: 0.0003 },
+    suelo: { ...p.suelo },
+    pendiente: p.pendiente,
+    rugosidad: p.rugosidad,
+  };
+}
+
+export function sitioDesdePresetPds(p: AnalogoPlanetarioPds): SitioAmbiental {
+  const esLuna = p.cuerpo === 'luna';
+  return {
+    id: p.id,
+    nombre: p.etiquetaSitio,
+    esTierra: false,
+    lat: p.lat,
+    lon: p.lon,
+    fuenteDatos: p.misionFuente,
+    periodo: p.periodo,
+    T: [...p.T],
+    P: [...p.P],
+    viento: [...p.viento],
+    luz: [...p.luz],
+    g: p.g,
+    radiacion: p.radiacion,
+    aire: esLuna
+      ? { N2: 0, O2: 0, Ar: 0.35, CO2: 0, otros: 0.65 }
+      : { N2: 0.027, O2: 0.0013, Ar: 0.016, CO2: 0.953, otros: 0.0027 },
+    suelo: { ...p.suelo },
+    pendiente: p.pendiente,
+    rugosidad: p.rugosidad,
+  };
+}
+
+export type PerfilRecomendacion = 'equilibrado' | 'rover' | 'traje' | 'base';
+
+export interface RecomendacionAnalogoItem {
+  preset: AnalogoTerrestrePreset;
+  sitioTierra: SitioAmbiental;
+  resultado: ResultadoComparacion;
+  puntuacionPrueba: number;
+  factoresFuertes: Array<{ variable: VariableAnalogo; etiqueta: string; valor: number }>;
+  brechasACompensar: Array<{ variable: VariableAnalogo; etiqueta: string; valor: number }>;
+  resumenIngenieria: string;
+}
+
+const PESOS_POR_PERFIL: Record<PerfilRecomendacion, Record<VariableAnalogo, number>> = {
+  equilibrado: PESOS_DEFAULT,
+  rover: {
+    temperatura: 2.5,
+    presion: 1.5,
+    viento: 2.0,
+    luz: 1.5,
+    gravedad: 1.5,
+    radiacion: 1.0,
+    aire: 1.0,
+    suelo: 4.0,
+    terreno: 4.5,
+  },
+  traje: {
+    temperatura: 4.0,
+    presion: 2.5,
+    viento: 1.5,
+    luz: 2.5,
+    gravedad: 2.0,
+    radiacion: 2.0,
+    aire: 1.5,
+    suelo: 3.5,
+    terreno: 3.0,
+  },
+  base: {
+    temperatura: 3.5,
+    presion: 2.0,
+    viento: 3.0,
+    luz: 3.0,
+    gravedad: 1.5,
+    radiacion: 2.5,
+    aire: 1.5,
+    suelo: 3.0,
+    terreno: 3.5,
+  },
+};
+
+export function recomendarAnalogosTerrestres(
+  destino: SitioAmbiental,
+  perfil: PerfilRecomendacion = 'equilibrado'
+): RecomendacionAnalogoItem[] {
+  const pesosPerfil = PESOS_POR_PERFIL[perfil];
+  const criticasPerfil: VariableAnalogo[] =
+    perfil === 'equilibrado'
+      ? CRITICAS_DEFAULT
+      : perfil === 'rover'
+        ? ['suelo', 'terreno', 'temperatura']
+        : perfil === 'traje'
+          ? ['temperatura', 'suelo', 'terreno']
+          : ['temperatura', 'terreno', 'suelo'];
+
+  const items: RecomendacionAnalogoItem[] = ANALOGOS_TERRESTRES_NASA.map((preset) => {
+    const sitioTierra = sitioDesdePresetTerrestre(preset);
+    const resultado = compararSitios(sitioTierra, destino, {
+      horas: [0, 48],
+      modo: destino.periodo > 48 ? 'ciclo' : 'reloj',
+      n: 120,
+      pesos: pesosPerfil,
+      criticas: criticasPerfil,
+    });
+
+    // Índice de aptitud para pruebas de campo terrestres (evalúa similitud + fidelidad de suelo/terreno/clima)
+    const ordenadas = ORDEN_VARIABLES.map((v) => ({
+      variable: v,
+      etiqueta: METADATOS_VARIABLES[v].etiqueta,
+      valor: resultado.porVariable[v],
+    })).sort((a, b) => b.valor - a.valor);
+
+    const factoresFuertes = ordenadas.slice(0, 3);
+    const brechasACompensar = [...ordenadas].reverse().slice(0, 3);
+
+    const puntuacionPrueba = Number(
+      (
+        0.55 * resultado.mediaSimple +
+        0.25 * resultado.porVariable.suelo +
+        0.2 * resultado.porVariable.terreno
+      ).toFixed(1)
+    );
+
+    const topNames = factoresFuertes.map((f) => f.etiqueta.toLowerCase()).join(', ');
+    const gapNames = brechasACompensar
+      .slice(0, 2)
+      .map((g) => g.etiqueta.toLowerCase())
+      .join(' y ');
+
+    const resumenIngenieria = `Destaca en ${topNames}; en campaña de campo requiere compensar en cámara ${gapNames}.`;
+
+    return {
+      preset,
+      sitioTierra,
+      resultado,
+      puntuacionPrueba,
+      factoresFuertes,
+      brechasACompensar,
+      resumenIngenieria,
+    };
+  });
+
+  return items.sort((a, b) => b.puntuacionPrueba - a.puntuacionPrueba);
+}
+

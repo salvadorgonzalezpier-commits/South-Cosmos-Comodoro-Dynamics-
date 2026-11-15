@@ -120,7 +120,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
 
   if (status === APILoadingStatus.AUTH_FAILURE || status === APILoadingStatus.FAILED) {
     return (
-      <div className="w-full h-[380px] sm:h-[400px] flex flex-col items-center justify-center p-6 text-center bg-slate-900 text-slate-200 rounded-md border border-slate-200">
+      <div className="w-full h-[380px] sm:h-[400px] flex flex-col items-center justify-center p-6 text-center bg-[#07090E] text-slate-200 rounded-md border border-slate-800">
         <p className="text-xs font-semibold">
           No se pudo inicializar el visor satelital de Google Maps Platform
         </p>
@@ -137,7 +137,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
       {/* Controles de proyección y escala */}
       {viewMode === '2d' ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
             {(
               [
                 { id: 'satellite', label: 'Satélite' },
@@ -151,8 +151,8 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
                 onClick={() => setMapTypeId(opt.id)}
                 className={`px-2.5 py-1 text-[11px] font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                   mapTypeId === opt.id
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                    : 'text-slate-400 hover:text-slate-100'
                 }`}
               >
                 {opt.label}
@@ -160,7 +160,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
             ))}
           </div>
 
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
             {[
               { z: 9, label: 'Regional' },
               { z: 12, label: 'Sector' },
@@ -173,8 +173,8 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
                 onClick={() => setZoom2d(preset.z)}
                 className={`px-2 py-1 text-[11px] font-mono tabular-nums rounded whitespace-nowrap shrink-0 transition-colors ${
                   zoom2d === preset.z
-                    ? 'bg-white text-slate-900 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-slate-800 text-slate-100'
+                    : 'text-slate-400 hover:text-slate-100'
                 }`}
               >
                 {preset.label}
@@ -184,14 +184,14 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
         </div>
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+          <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
             <button
               type="button"
               onClick={() => setMapTypeId('satellite')}
               className={`px-2.5 py-1 text-[11px] font-medium rounded whitespace-nowrap shrink-0 ${
                 mapTypeId !== 'hybrid'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               3D Satélite
@@ -201,8 +201,8 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
               onClick={() => setMapTypeId('hybrid')}
               className={`px-2.5 py-1 text-[11px] font-medium rounded whitespace-nowrap shrink-0 ${
                 mapTypeId === 'hybrid'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               3D Híbrido
@@ -210,7 +210,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+            <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
               {[
                 { r: 12000, label: '12 km' },
                 { r: 4500, label: '4.5 km' },
@@ -222,8 +222,8 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
                   onClick={() => setRange3d(item.r)}
                   className={`px-2 py-1 text-[11px] font-mono tabular-nums rounded whitespace-nowrap shrink-0 ${
                     range3d === item.r
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-slate-800 text-slate-100'
+                      : 'text-slate-400 hover:text-slate-100'
                   }`}
                 >
                   {item.label}
@@ -234,7 +234,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
             <button
               type="button"
               onClick={() => setTilt3d((prev) => (prev > 20 ? 0 : 58))}
-              className="px-2 py-1 text-[11px] font-mono tabular-nums bg-slate-100 hover:bg-slate-200 text-slate-700 rounded whitespace-nowrap shrink-0"
+              className="px-2 py-1 text-[11px] font-mono tabular-nums bg-slate-950 border border-slate-800 hover:border-cyan-500/40 text-slate-300 rounded whitespace-nowrap shrink-0"
             >
               {tilt3d > 20 ? 'Cenital 0°' : 'Oblicua 58°'}
             </button>
@@ -242,7 +242,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
             <button
               type="button"
               onClick={() => setHeading3d((prev) => (prev + 45) % 360)}
-              className="px-2 py-1 text-[11px] font-mono tabular-nums bg-slate-100 hover:bg-slate-200 text-slate-700 rounded whitespace-nowrap shrink-0"
+              className="px-2 py-1 text-[11px] font-mono tabular-nums bg-slate-950 border border-slate-800 hover:border-cyan-500/40 text-slate-300 rounded whitespace-nowrap shrink-0"
             >
               Rumbo {heading3d}°
             </button>
@@ -251,7 +251,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
       )}
 
       {/* Contenedor explícito con altura fija para evitar colapso 0x0 */}
-      <div className="relative w-full h-[380px] sm:h-[400px] bg-slate-900 rounded-md overflow-hidden border border-slate-200">
+      <div className="relative w-full h-[380px] sm:h-[400px] bg-[#07090E] rounded-md overflow-hidden border border-slate-800">
         {viewMode === '2d' ? (
           <GoogleMap
             mapId="DEMO_MAP_ID"
@@ -347,7 +347,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
         )}
       </div>
 
-      <p className="text-[11px] text-slate-500">
+      <p className="text-[11px] text-slate-400">
         Haz clic sobre el mapa satelital 2D para reposicionar las coordenadas del
         análogo y sincronizar NASA POWER y Earthdata CMR.
       </p>
@@ -358,7 +358,7 @@ const InnerSatelliteViewer: React.FC<GoogleSatelliteMapProps> = ({
 export const GoogleSatelliteMap: React.FC<GoogleSatelliteMapProps> = (props) => {
   if (!GOOGLE_MAPS_API_KEY) {
     return (
-      <div className="w-full h-[380px] sm:h-[400px] flex flex-col items-center justify-center p-6 text-center bg-slate-900 text-slate-200 rounded-md border border-slate-200">
+      <div className="w-full h-[380px] sm:h-[400px] flex flex-col items-center justify-center p-6 text-center bg-[#07090E] text-slate-200 rounded-md border border-slate-800">
         <p className="text-xs font-semibold">
           Clave de Google Maps Platform no disponible en el cliente
         </p>

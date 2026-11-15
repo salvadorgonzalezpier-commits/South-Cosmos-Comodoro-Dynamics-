@@ -24,3 +24,16 @@
     scroll-behavior: auto !important;
   }
 }
+
+@media print {
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  body,
+  .print-sheet {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+}

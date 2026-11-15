@@ -406,15 +406,15 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
   return (
     <section
       id="verificacion-whitelist"
-      className="bg-white border border-slate-200 rounded-lg overflow-hidden"
+      className="bg-[#0D121D] border border-slate-800 rounded-lg overflow-hidden text-slate-100"
     >
       {/* Cabecera + Sesión Google Firebase */}
-      <div className="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+      <div className="px-5 py-4 border-b border-slate-800 bg-[#0B0E17] flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-slate-100">
             Ingesta, verificación con Google Search y lista blanca oficial
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Las páginas en lista blanca oficial aprueban y entrenan el modelo sin
             verificación manual; el resto se verifica mediante Google Search Grounding
           </p>
@@ -423,13 +423,13 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           {user ? (
             <div className="flex items-center gap-3 text-xs">
-              <span className="text-slate-600 truncate max-w-[220px]">
+              <span className="text-cyan-300 font-mono truncate max-w-[220px]">
                 {user.displayName || user.email} · Firestore activo
               </span>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-md hover:bg-slate-200 whitespace-nowrap shrink-0"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-[#07090E] border border-slate-700 rounded-md hover:border-slate-500 whitespace-nowrap shrink-0"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 Salir
@@ -439,7 +439,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
             <button
               type="button"
               onClick={handleLogin}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 rounded-md hover:bg-cyan-300 whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-cyan-400"
             >
               <LogIn className="w-3.5 h-3.5" />
               Conectar con Google (Firestore)
@@ -449,20 +449,20 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
       </div>
 
       {authError && (
-        <div className="px-5 py-2 bg-rose-50 border-b border-rose-200 text-xs text-rose-800">
+        <div className="px-5 py-2 bg-rose-950/60 border-b border-rose-500/40 text-xs text-rose-300">
           {authError}
         </div>
       )}
 
       {/* Pestañas funcionales */}
-      <div className="px-5 pt-3 border-b border-slate-200 flex flex-wrap items-center gap-1">
+      <div className="px-5 pt-3 border-b border-slate-800 bg-[#0B0E17] flex flex-wrap items-center gap-1">
         <button
           type="button"
           onClick={() => setTab('verificar')}
           className={`px-3.5 py-2 text-xs font-medium border-b-2 whitespace-nowrap transition-colors ${
             tab === 'verificar'
-              ? 'border-blue-600 text-blue-700'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'border-cyan-400 text-cyan-300'
+              : 'border-transparent text-slate-400 hover:text-slate-100'
           }`}
         >
           Añadir y verificar datos
@@ -472,8 +472,8 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
           onClick={() => setTab('whitelist')}
           className={`px-3.5 py-2 text-xs font-medium border-b-2 whitespace-nowrap transition-colors ${
             tab === 'whitelist'
-              ? 'border-blue-600 text-blue-700'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'border-cyan-400 text-cyan-300'
+              : 'border-transparent text-slate-400 hover:text-slate-100'
           }`}
         >
           Lista blanca oficial ({dominios.filter((d) => d.activo === 1).length})
@@ -483,8 +483,8 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
           onClick={() => setTab('nube')}
           className={`px-3.5 py-2 text-xs font-medium border-b-2 whitespace-nowrap transition-colors ${
             tab === 'nube'
-              ? 'border-blue-600 text-blue-700'
-              : 'border-transparent text-slate-600 hover:text-slate-900'
+              ? 'border-cyan-400 text-cyan-300'
+              : 'border-transparent text-slate-400 hover:text-slate-100'
           }`}
         >
           Registro en Firestore ({cloudEntries.length})
@@ -501,13 +501,13 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
+                  <label className="block font-medium text-slate-400 mb-1">
                     Sitio planetario destino
                   </label>
                   <select
                     value={sitio}
                     onChange={(e) => setSitio(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-slate-900"
+                    className="w-full px-3 py-2 bg-[#07090E] border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:border-cyan-400"
                   >
                     {SITIOS_OPCIONES.map((s) => (
                       <option key={s} value={s}>
@@ -518,7 +518,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                 </div>
 
                 <div>
-                  <label className="block font-medium text-slate-700 mb-1">
+                  <label className="block font-medium text-slate-400 mb-1">
                     URL de la página fuente
                   </label>
                   <input
@@ -526,21 +526,21 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                     value={sourceUrl}
                     onChange={(e) => setSourceUrl(e.target.value)}
                     placeholder="https://pds.nasa.gov/..."
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md font-mono text-slate-900"
+                    className="w-full px-3 py-2 bg-[#07090E] border border-slate-700 rounded-md font-mono text-slate-100 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>
 
               {/* Estado inmediato contra la lista blanca */}
-              <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-md flex flex-wrap items-center justify-between gap-2">
+              <div className="px-3 py-2 bg-[#07090E] border border-slate-800 rounded-md flex flex-wrap items-center justify-between gap-2">
                 {coincidenciaListaBlanca ? (
-                  <span className="text-emerald-700 font-medium inline-flex items-center gap-1.5">
+                  <span className="text-emerald-400 font-medium inline-flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 shrink-0" />
                     Dominio en lista blanca ({coincidenciaListaBlanca.dominio} ·{' '}
                     {coincidenciaListaBlanca.categoria}): aprueba y entrena sin verificar
                   </span>
                 ) : (
-                  <span className="text-amber-700 font-medium">
+                  <span className="text-amber-300 font-medium">
                     Dominio fuera de lista blanca: usa Google Search Grounding para
                     verificar antes de aprobar
                   </span>
@@ -548,50 +548,50 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
+                <label className="block font-medium text-slate-400 mb-1">
                   Consulta o afirmación a verificar con Google Search
                 </label>
                 <textarea
                   rows={2}
                   value={consulta}
                   onChange={(e) => setConsulta(e.target.value)}
-                  className="w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-slate-900"
+                  className="w-full px-3 py-2 bg-[#07090E] border border-slate-700 rounded-md text-slate-100 focus:outline-none focus:border-cyan-400"
                 />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 <div>
-                  <label className="block text-[11px] text-slate-500 mb-1">Hora (h)</label>
+                  <label className="block text-[11px] text-slate-400 mb-1">Hora (h)</label>
                   <input
                     type="number"
                     step="0.5"
                     value={hora}
                     onChange={(e) => setHora(e.target.value)}
-                    className="w-full px-2.5 py-1.5 font-mono tabular-nums border border-slate-300 rounded"
+                    className="w-full px-2.5 py-1.5 font-mono tabular-nums bg-[#07090E] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-500 mb-1">T (K)</label>
+                  <label className="block text-[11px] text-slate-400 mb-1">T (K)</label>
                   <input
                     type="number"
                     step="0.1"
                     value={tempK}
                     onChange={(e) => setTempK(e.target.value)}
-                    className="w-full px-2.5 py-1.5 font-mono tabular-nums border border-slate-300 rounded"
+                    className="w-full px-2.5 py-1.5 font-mono tabular-nums bg-[#07090E] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-500 mb-1">P (Pa)</label>
+                  <label className="block text-[11px] text-slate-400 mb-1">P (Pa)</label>
                   <input
                     type="number"
                     step="any"
                     value={presionPa}
                     onChange={(e) => setPresionPa(e.target.value)}
-                    className="w-full px-2.5 py-1.5 font-mono tabular-nums border border-slate-300 rounded"
+                    className="w-full px-2.5 py-1.5 font-mono tabular-nums bg-[#07090E] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-500 mb-1">
+                  <label className="block text-[11px] text-slate-400 mb-1">
                     Viento (m/s)
                   </label>
                   <input
@@ -599,11 +599,11 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                     step="0.1"
                     value={vientoMs}
                     onChange={(e) => setVientoMs(e.target.value)}
-                    className="w-full px-2.5 py-1.5 font-mono tabular-nums border border-slate-300 rounded"
+                    className="w-full px-2.5 py-1.5 font-mono tabular-nums bg-[#07090E] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] text-slate-500 mb-1">
+                  <label className="block text-[11px] text-slate-400 mb-1">
                     Luz (W/m²)
                   </label>
                   <input
@@ -611,18 +611,18 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                     step="1"
                     value={luzWm2}
                     onChange={(e) => setLuzWm2(e.target.value)}
-                    className="w-full px-2.5 py-1.5 font-mono tabular-nums border border-slate-300 rounded"
+                    className="w-full px-2.5 py-1.5 font-mono tabular-nums bg-[#07090E] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                   />
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-                <label className="inline-flex items-center gap-2 text-slate-700 cursor-pointer">
+                <label className="inline-flex items-center gap-2 text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={entrenarAuto}
                     onChange={(e) => setEntrenarAuto(e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600"
+                    className="rounded border-slate-600 bg-[#07090E] accent-cyan-400"
                   />
                   Entrenar modelo automáticamente al aprobar
                 </label>
@@ -632,7 +632,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                     type="button"
                     disabled={verificando || ingiriendo}
                     onClick={() => handleVerificarSearch(false)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-800 bg-slate-100 border border-slate-200 rounded-md hover:bg-slate-200 disabled:opacity-50 whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-200 bg-[#07090E] border border-slate-700 rounded-md hover:border-slate-500 disabled:opacity-50 whitespace-nowrap shrink-0"
                   >
                     <Search className="w-3.5 h-3.5" />
                     {verificando ? 'Verificando...' : 'Verificar con Google Search'}
@@ -641,7 +641,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                   <button
                     type="submit"
                     disabled={verificando || ingiriendo}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-blue-700 rounded-md hover:bg-blue-800 disabled:opacity-50 whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 rounded-md hover:bg-cyan-300 disabled:opacity-50 whitespace-nowrap shrink-0"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     {coincidenciaListaBlanca
@@ -656,20 +656,20 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
               </div>
 
               {mensajeEstado && (
-                <div className="px-3 py-2 bg-blue-50 border border-blue-200 rounded text-xs font-mono text-blue-900">
+                <div className="px-3 py-2 bg-cyan-950/40 border border-cyan-500/40 rounded text-xs font-mono text-cyan-200">
                   {mensajeEstado}
                 </div>
               )}
             </form>
 
             {/* Resultado de Google Search Grounding */}
-            <div className="xl:col-span-5 border border-slate-200 rounded-md p-4 bg-slate-50/60 flex flex-col justify-between space-y-3">
+            <div className="xl:col-span-5 border border-slate-800 rounded-md p-4 bg-[#07090E] flex flex-col justify-between space-y-3">
               <div className="space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                  <h3 className="text-sm font-semibold text-slate-900">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <h3 className="text-sm font-semibold text-slate-100">
                     Auditoría Google Search Grounding
                   </h3>
-                  <span className="text-[11px] font-mono text-slate-500">
+                  <span className="text-[11px] font-mono text-cyan-400">
                     gemini-4-hydrogen
                   </span>
                 </div>
@@ -680,23 +680,23 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                       <span
                         className={
                           resultadoSearch.verificado
-                            ? 'text-emerald-700 font-semibold'
-                            : 'text-amber-700 font-semibold'
+                            ? 'text-emerald-400 font-semibold'
+                            : 'text-amber-300 font-semibold'
                         }
                       >
                         {resultadoSearch.verificado ? 'VERIFICADO' : 'REVISIÓN REQUERIDA'}
                       </span>
-                      <span className="tabular-nums text-slate-600">
+                      <span className="tabular-nums text-slate-400">
                         Confianza: {(resultadoSearch.confianza * 100).toFixed(0)}%
                       </span>
                     </div>
 
-                    <p className="text-slate-700 leading-relaxed">
+                    <p className="text-slate-300 leading-relaxed">
                       {resultadoSearch.resumen}
                     </p>
 
                     <div className="space-y-1.5">
-                      <div className="text-[11px] font-medium text-slate-500">
+                      <div className="text-[11px] font-medium text-slate-400">
                         Fuentes encontradas en Google Search:
                       </div>
                       {resultadoSearch.fuentes.length === 0 ? (
@@ -708,20 +708,20 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                           {resultadoSearch.fuentes.map((f) => (
                             <div
                               key={f.uri}
-                              className="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded px-2.5 py-1.5"
+                              className="flex items-center justify-between gap-2 bg-[#0D121D] border border-slate-800 rounded px-2.5 py-1.5"
                             >
                               <a
                                 href={f.uri}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-blue-700 hover:underline truncate inline-flex items-center gap-1"
+                                className="text-cyan-400 hover:underline truncate inline-flex items-center gap-1"
                               >
                                 <span className="truncate">{f.title}</span>
                                 <ExternalLink className="w-3 h-3 shrink-0" />
                               </a>
                               <span
                                 className={`text-[11px] font-mono whitespace-nowrap shrink-0 ${
-                                  f.enListaBlanca ? 'text-emerald-700' : 'text-slate-400'
+                                  f.enListaBlanca ? 'text-emerald-400' : 'text-slate-500'
                                 }`}
                               >
                                 {f.enListaBlanca ? 'Oficial' : f.dominio ?? 'Web'}
@@ -733,7 +733,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     Pulsa «Verificar con Google Search» para contrastar mediciones en
                     tiempo real con Google Search Grounding y autocompletar valores SI
                     (K, Pa, m/s, W/m²). Si la fuente pertenece a tu lista blanca, también
@@ -747,7 +747,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                   type="button"
                   disabled={verificando}
                   onClick={() => handleVerificarSearch(true)}
-                  className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-medium text-white bg-slate-900 rounded-md hover:bg-slate-800 disabled:opacity-50"
+                  className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 rounded-md hover:bg-cyan-300 disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   Aprobar dato verificado y entrenar modelo
@@ -761,10 +761,10 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
           <div className="space-y-4">
             <form
               onSubmit={handleAgregarDominio}
-              className="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end text-xs bg-slate-50/70 p-3.5 border border-slate-200 rounded-md"
+              className="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end text-xs bg-[#07090E] p-3.5 border border-slate-800 rounded-md"
             >
               <div className="md:col-span-3">
-                <label className="block font-medium text-slate-600 mb-1">
+                <label className="block font-medium text-slate-400 mb-1">
                   Dominio o URL oficial
                 </label>
                 <input
@@ -773,11 +773,11 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                   value={nuevoDominio}
                   onChange={(e) => setNuevoDominio(e.target.value)}
                   placeholder="astrogeology.usgs.gov"
-                  className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded font-mono"
+                  className="w-full px-2.5 py-1.5 bg-[#0D121D] border border-slate-700 rounded font-mono text-slate-100 focus:outline-none focus:border-cyan-400"
                 />
               </div>
               <div className="md:col-span-4">
-                <label className="block font-medium text-slate-600 mb-1">
+                <label className="block font-medium text-slate-400 mb-1">
                   Descripción / Institución
                 </label>
                 <input
@@ -785,11 +785,11 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                   value={nuevaEtiqueta}
                   onChange={(e) => setNuevaEtiqueta(e.target.value)}
                   placeholder="USGS Planetary Astrogeology"
-                  className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded"
+                  className="w-full px-2.5 py-1.5 bg-[#0D121D] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                 />
               </div>
               <div className="md:col-span-2">
-                <label className="block font-medium text-slate-600 mb-1">
+                <label className="block font-medium text-slate-400 mb-1">
                   Agencia
                 </label>
                 <select
@@ -799,7 +799,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                       e.target.value as 'NASA' | 'PDS' | 'ESA' | 'USGS' | 'NOAA' | 'Oficial'
                     )
                   }
-                  className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded"
+                  className="w-full px-2.5 py-1.5 bg-[#0D121D] border border-slate-700 rounded text-slate-100 focus:outline-none focus:border-cyan-400"
                 >
                   <option value="NASA">NASA</option>
                   <option value="PDS">PDS</option>
@@ -810,18 +810,18 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                 </select>
               </div>
               <div className="md:col-span-3 flex items-center justify-between gap-2">
-                <label className="inline-flex items-center gap-1.5 text-slate-700 cursor-pointer">
+                <label className="inline-flex items-center gap-1.5 text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={nuevoAutoEntrenar}
                     onChange={(e) => setNuevoAutoEntrenar(e.target.checked)}
-                    className="rounded border-slate-300 text-blue-600"
+                    className="rounded border-slate-600 bg-[#0D121D] accent-cyan-400"
                   />
                   Auto-entrenar
                 </label>
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-slate-950 bg-cyan-400 rounded hover:bg-cyan-300 whitespace-nowrap shrink-0"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   Agregar
@@ -830,13 +830,13 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
             </form>
 
             {msgWhitelist && (
-              <div className="text-xs font-mono text-blue-800">{msgWhitelist}</div>
+              <div className="text-xs font-mono text-cyan-300">{msgWhitelist}</div>
             )}
 
-            <div className="overflow-x-auto border border-slate-200 rounded-md">
+            <div className="overflow-x-auto border border-slate-800 rounded-md bg-[#07090E]">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200 text-slate-500">
+                  <tr className="bg-[#0B0E17] border-b border-slate-800 text-slate-400">
                     <th className="py-2 px-3">Dominio autorizado</th>
                     <th className="py-2 px-3">Institución</th>
                     <th className="py-2 px-3">Agencia</th>
@@ -844,20 +844,20 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                     <th className="py-2 px-3 text-right">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-800/70">
                   {dominios.map((d) => (
-                    <tr key={d.id} className="hover:bg-slate-50/70">
-                      <td className="py-2 px-3 font-mono font-semibold text-slate-900">
+                    <tr key={d.id} className="hover:bg-slate-900/50">
+                      <td className="py-2 px-3 font-mono font-semibold text-slate-100">
                         {d.dominio}
                       </td>
-                      <td className="py-2 px-3 text-slate-600">{d.etiqueta}</td>
-                      <td className="py-2 px-3 font-mono text-slate-500">
+                      <td className="py-2 px-3 text-slate-300">{d.etiqueta}</td>
+                      <td className="py-2 px-3 font-mono text-slate-400">
                         {d.categoria}
                       </td>
                       <td className="py-2 px-3 font-mono">
                         <span
                           className={
-                            d.activo === 1 ? 'text-emerald-700' : 'text-slate-400'
+                            d.activo === 1 ? 'text-emerald-400' : 'text-slate-500'
                           }
                         >
                           {d.activo === 1
@@ -871,14 +871,14 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                         <button
                           type="button"
                           onClick={() => handleToggleDominio(d)}
-                          className="text-xs font-medium text-blue-700 hover:underline"
+                          className="text-xs font-medium text-cyan-400 hover:underline"
                         >
                           {d.activo === 1 ? 'Desactivar' : 'Activar'}
                         </button>
                         <button
                           type="button"
                           onClick={() => handleEliminarDominio(d)}
-                          className="inline-flex items-center text-rose-700 hover:text-rose-900"
+                          className="inline-flex items-center text-rose-400 hover:text-rose-300"
                           title="Eliminar dominio"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -895,7 +895,7 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
         {tab === 'nube' && (
           <div className="space-y-3 text-xs">
             {!user ? (
-              <div className="p-4 border border-slate-200 rounded-md bg-slate-50 text-slate-600 flex flex-wrap items-center justify-between gap-3">
+              <div className="p-4 border border-slate-800 rounded-md bg-[#07090E] text-slate-300 flex flex-wrap items-center justify-between gap-3">
                 <span>
                   Inicia sesión con tu cuenta de Google para guardar y sincronizar tus
                   registros verificados y dominios autorizados en Firestore.
@@ -903,22 +903,22 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                 <button
                   type="button"
                   onClick={handleLogin}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded hover:bg-slate-800"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-950 bg-cyan-400 rounded hover:bg-cyan-300"
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   Conectar con Google
                 </button>
               </div>
             ) : cloudEntries.length === 0 ? (
-              <div className="p-4 border border-slate-200 rounded-md text-slate-500">
+              <div className="p-4 border border-slate-800 rounded-md bg-[#07090E] text-slate-400">
                 Aún no has guardado observaciones verificadas en tu colección Firestore.
                 Añade o verifica un dato en la primera pestaña para persistirlo aquí.
               </div>
             ) : (
-              <div className="overflow-x-auto border border-slate-200 rounded-md">
+              <div className="overflow-x-auto border border-slate-800 rounded-md bg-[#07090E]">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-500">
+                    <tr className="bg-[#0B0E17] border-b border-slate-800 text-slate-400">
                       <th className="py-2 px-3">Sitio</th>
                       <th className="py-2 px-3">Dominio</th>
                       <th className="py-2 px-3 text-right">T (K)</th>
@@ -927,26 +927,28 @@ export const WhitelistVerifyPanel: React.FC<WhitelistVerifyPanelProps> = ({
                       <th className="py-2 px-3">Estado</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono tabular-nums">
+                  <tbody className="divide-y divide-slate-800/70 font-mono tabular-nums">
                     {cloudEntries.map((item) => (
                       <tr key={item.id}>
-                        <td className="py-2 px-3 font-sans font-medium text-slate-900">
+                        <td className="py-2 px-3 font-sans font-medium text-slate-100">
                           {item.sitio}
                         </td>
-                        <td className="py-2 px-3 text-slate-600">{item.sourceDomain}</td>
-                        <td className="py-2 px-3 text-right">
+                        <td className="py-2 px-3 text-slate-400">{item.sourceDomain}</td>
+                        <td className="py-2 px-3 text-right text-slate-200">
                           {item.temperatura.toFixed(1)}
                         </td>
-                        <td className="py-2 px-3 text-right">
+                        <td className="py-2 px-3 text-right text-slate-200">
                           {item.presion.toExponential(1)}
                         </td>
-                        <td className="py-2 px-3 text-right">{item.luz.toFixed(0)}</td>
+                        <td className="py-2 px-3 text-right text-slate-200">
+                          {item.luz.toFixed(0)}
+                        </td>
                         <td className="py-2 px-3">
                           <span
                             className={
                               item.status === 'aprobado'
-                                ? 'text-emerald-700'
-                                : 'text-amber-700'
+                                ? 'text-emerald-400'
+                                : 'text-amber-300'
                             }
                           >
                             {item.status}

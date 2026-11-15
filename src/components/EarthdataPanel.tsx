@@ -373,29 +373,29 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
   return (
     <section
       id="earthdata"
-      className="bg-white border border-slate-200 rounded-lg overflow-hidden"
+      className="bg-[#0D121D] border border-slate-800 rounded-lg overflow-hidden"
     >
       {/* Cabecera de integración NASA Earthdata, Google Earth y Worldview */}
-      <div className="px-5 py-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4">
+      <div className="px-5 py-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="text-base font-semibold text-slate-100">
             Datos terrestres en vivo: NASA Earthdata, Google Earth & Worldview
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Observaciones horarias reales (NASA POWER), imágenes satelitales 2D/3D
             de Google Earth / Maps, Worldview GIBS y catálogo CMR
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-md">
+          <div className="flex items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md">
             <button
               type="button"
               onClick={() => onToggleNasaEnVivo(true)}
-              className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+              className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                 usarNasaEnVivo
-                  ? 'bg-white text-blue-800 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               NASA Earthdata en vivo
@@ -403,10 +403,10 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
             <button
               type="button"
               onClick={() => onToggleNasaEnVivo(false)}
-              className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+              className={`px-3 py-1.5 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                 !usarNasaEnVivo
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-slate-800 text-slate-100'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               Modelo sintético (analogo.py)
@@ -416,12 +416,12 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
       </div>
 
       {/* Selector de análogo terrestre, coordenadas y fechas */}
-      <div className="px-5 py-4 bg-slate-50/70 border-b border-slate-200 space-y-3">
+      <div className="px-5 py-4 bg-[#0B0E17] border-b border-slate-800 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <label
               htmlFor="select-tierra-preset"
-              className="text-xs font-medium text-slate-600 whitespace-nowrap"
+              className="text-xs font-medium text-slate-400 whitespace-nowrap"
             >
               Análogos terrestres ({ANALOGOS_TERRESTRES_NASA.length}):
             </label>
@@ -431,7 +431,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               onChange={(e) => {
                 if (e.target.value) handleSeleccionarPreset(e.target.value);
               }}
-              className="px-2.5 py-1 text-xs bg-white border border-slate-300 rounded text-slate-800 font-medium"
+              className="px-2.5 py-1 text-xs bg-slate-950 border border-slate-700 rounded text-slate-100 font-medium"
             >
               {presetSeleccionado === 'personalizado' && (
                 <option value="">Coordenadas personalizadas</option>
@@ -454,10 +454,10 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               key={p.id}
               type="button"
               onClick={() => handleSeleccionarPreset(p.id)}
-              className={`px-2 py-1 text-[11px] font-medium rounded border whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600 ${
+              className={`px-2 py-1 text-[11px] font-medium rounded border whitespace-nowrap shrink-0 transition-colors ${
                 presetSeleccionado === p.id
-                  ? 'bg-blue-50 border-blue-300 text-blue-800'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                  ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                  : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-600'
               }`}
             >
               {p.nombre}
@@ -472,7 +472,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
           <div>
             <label
               htmlFor="nasa-lat"
-              className="block text-[11px] font-medium text-slate-600 mb-1"
+              className="block text-[11px] font-medium text-slate-400 mb-1"
             >
               Latitud (°)
             </label>
@@ -484,13 +484,13 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               max="89.5"
               value={latInput}
               onChange={(e) => setLatInput(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded"
+              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-slate-950 border border-slate-700 text-slate-100 rounded"
             />
           </div>
           <div>
             <label
               htmlFor="nasa-lon"
-              className="block text-[11px] font-medium text-slate-600 mb-1"
+              className="block text-[11px] font-medium text-slate-400 mb-1"
             >
               Longitud (°)
             </label>
@@ -502,13 +502,13 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               max="180"
               value={lonInput}
               onChange={(e) => setLonInput(e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded"
+              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-slate-950 border border-slate-700 text-slate-100 rounded"
             />
           </div>
           <div>
             <label
               htmlFor="nasa-start"
-              className="block text-[11px] font-medium text-slate-600 mb-1"
+              className="block text-[11px] font-medium text-slate-400 mb-1"
             >
               Fecha inicio
             </label>
@@ -520,13 +520,13 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                 setImgError(false);
                 onChangeFechas(e.target.value, endDate);
               }}
-              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded"
+              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-slate-950 border border-slate-700 text-slate-100 rounded"
             />
           </div>
           <div>
             <label
               htmlFor="nasa-end"
-              className="block text-[11px] font-medium text-slate-600 mb-1"
+              className="block text-[11px] font-medium text-slate-400 mb-1"
             >
               Fecha fin
             </label>
@@ -535,14 +535,14 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               type="date"
               value={endDate}
               onChange={(e) => onChangeFechas(startDate, e.target.value)}
-              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-white border border-slate-300 rounded"
+              className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums bg-slate-950 border border-slate-700 text-slate-100 rounded"
             />
           </div>
           <div className="col-span-2 flex items-center gap-2">
             <button
               type="submit"
               disabled={cargandoPower}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-medium text-white bg-blue-700 rounded hover:bg-blue-800 disabled:opacity-50 whitespace-nowrap shrink-0 transition-colors focus-visible:outline-2 focus-visible:outline-blue-600"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 text-xs font-medium text-slate-950 bg-cyan-400 rounded hover:bg-cyan-300 disabled:opacity-50 whitespace-nowrap shrink-0 transition-colors"
             >
               <RefreshCw
                 className={`w-3.5 h-3.5 ${cargandoPower ? 'animate-spin' : ''}`}
@@ -550,7 +550,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               {cargandoPower ? 'Consultando NASA...' : 'Actualizar datos NASA'}
             </button>
             {serieActual && (
-              <span className="text-[11px] font-mono tabular-nums text-slate-600 truncate">
+              <span className="text-[11px] font-mono tabular-nums text-slate-400 truncate">
                 {serieActual.horas.length} h · elev.{' '}
                 {serieActual.elevacionM !== null
                   ? `${serieActual.elevacionM.toFixed(0)} m`
@@ -561,26 +561,26 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
         </form>
 
         {errorPower && (
-          <div className="text-xs text-rose-700 font-medium">
+          <div className="text-xs text-rose-400 font-medium">
             Error NASA POWER: {errorPower}
           </div>
         )}
       </div>
 
-      {/* Dos columnas: Visor NASA Worldview + Catálogo NASA Earthdata Search */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-200">
+      {/* Dos columnas: Visor Satelital + Catálogo NASA Earthdata Search */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 divide-y xl:divide-y-0 xl:divide-x divide-slate-800">
         {/* Visor Satelital Dual: Google Earth / Maps & NASA Worldview */}
         <div className="xl:col-span-6 p-5 flex flex-col justify-between space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-sm font-semibold text-slate-100">
                 {visorSatelital === 'worldview'
                   ? 'Visor satelital NASA Worldview (GIBS)'
                   : visorSatelital === 'google-3d'
                     ? 'Visor orbital Google Earth 3D (Maps JS)'
                     : 'Visor satelital Google Maps / Earth (2D)'}
               </h3>
-              <p className="text-[11px] font-mono tabular-nums text-slate-500">
+              <p className="text-[11px] font-mono tabular-nums text-slate-400">
                 Centro ({lat.toFixed(4)}°, {lon.toFixed(4)}°)
                 {visorSatelital === 'worldview'
                   ? ` · fecha ${startDate} · ±${spanWorldview}°`
@@ -595,7 +595,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               }
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
             >
               {visorSatelital === 'worldview'
                 ? 'Abrir en Worldview'
@@ -604,15 +604,14 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
             </a>
           </div>
 
-          {/* Selector de motor satelital */}
-          <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-100 rounded-md w-fit">
+          <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-950 border border-slate-800 rounded-md w-fit">
             <button
               type="button"
               onClick={() => setVisorSatelital('google-2d')}
               className={`px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                 visorSatelital === 'google-2d'
-                  ? 'bg-white text-blue-800 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               Google Satélite
@@ -622,8 +621,8 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               onClick={() => setVisorSatelital('google-3d')}
               className={`px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                 visorSatelital === 'google-3d'
-                  ? 'bg-white text-blue-800 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               Google Earth 3D
@@ -633,8 +632,8 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               onClick={() => setVisorSatelital('worldview')}
               className={`px-2.5 py-1 text-xs font-medium rounded whitespace-nowrap shrink-0 transition-colors ${
                 visorSatelital === 'worldview'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  : 'text-slate-400 hover:text-slate-100'
               }`}
             >
               NASA Worldview (GIBS)
@@ -667,7 +666,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                     setCapaWorldview(e.target.value);
                   }}
                   aria-label="Capa satelital de NASA Worldview"
-                  className="px-2.5 py-1 text-xs bg-white border border-slate-300 rounded text-slate-800"
+                  className="px-2.5 py-1 text-xs bg-slate-950 border border-slate-700 rounded text-slate-100"
                 >
                   {CAPAS_WORLDVIEW.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -676,7 +675,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                   ))}
                 </select>
 
-                <div className="flex items-center gap-1 p-0.5 bg-slate-100 rounded">
+                <div className="flex items-center gap-1 p-0.5 bg-slate-950 border border-slate-800 rounded">
                   {[1, 2.5, 5].map((s) => (
                     <button
                       key={s}
@@ -687,8 +686,8 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                       }}
                       className={`px-2 py-1 text-[11px] font-mono rounded whitespace-nowrap ${
                         spanWorldview === s
-                          ? 'bg-white text-slate-900 shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
+                          ? 'bg-slate-800 text-slate-100'
+                          : 'text-slate-400 hover:text-slate-100'
                       }`}
                     >
                       ±{s}°
@@ -697,7 +696,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                 </div>
               </div>
 
-              <div className="relative h-[380px] sm:h-[400px] w-full bg-slate-900 rounded-md overflow-hidden border border-slate-200">
+              <div className="relative h-[380px] sm:h-[400px] w-full bg-[#07090E] rounded-md overflow-hidden border border-slate-800">
                 {!imgError ? (
                   <img
                     src={worldviewImgUrl}
@@ -709,27 +708,26 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-slate-900 text-slate-300">
+                  <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#07090E] text-slate-300">
                     <p className="text-xs font-medium">
                       Capa satelital sin cobertura para la fecha {startDate}
                     </p>
-                    <p className="text-[11px] text-slate-400 mt-1">
+                    <p className="text-[11px] text-slate-500 mt-1">
                       Prueba otra fecha o cambia entre MODIS Terra y VIIRS SNPP.
                     </p>
                   </div>
                 )}
 
-                {/* Retícula de coordenadas centrales */}
                 <div
                   className="pointer-events-none absolute inset-0 flex items-center justify-center"
                   aria-hidden="true"
                 >
-                  <div className="w-6 h-6 border border-white/80 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 border border-cyan-300/80 rounded-full flex items-center justify-center">
                     <div className="w-1 h-1 bg-amber-400 rounded-full" />
                   </div>
                 </div>
 
-                <div className="pointer-events-none absolute bottom-2 left-2 right-2 flex items-center justify-between px-2.5 py-1 bg-slate-950/75 text-white text-[11px] font-mono tabular-nums rounded">
+                <div className="pointer-events-none absolute bottom-2 left-2 right-2 flex items-center justify-between px-2.5 py-1 bg-slate-950/80 text-white text-[11px] font-mono tabular-nums rounded">
                   <span>{capaWorldview.replace(/_/g, ' ')}</span>
                   <span>
                     {lat.toFixed(2)}°, {lon.toFixed(2)}°
@@ -744,19 +742,19 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
         <div className="xl:col-span-6 p-5 flex flex-col space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">
+              <h3 className="text-sm font-semibold text-slate-100">
                 Catálogo NASA Earthdata Search (CMR)
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-slate-400">
                 Colecciones satelitales e in-situ indexadas en{' '}
-                <span className="font-mono">search.earthdata.nasa.gov</span>
+                <span className="font-mono text-slate-300">search.earthdata.nasa.gov</span>
               </p>
             </div>
             <a
               href={earthdataSearchDeepLink}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1 text-xs font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0"
             >
               Abrir en Earthdata Search
               <ExternalLink className="w-3.5 h-3.5" />
@@ -777,12 +775,12 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                 onChange={(e) => setCmrQuery(e.target.value)}
                 placeholder="Buscar colección (ej. Atacama, MERRA-2, MODIS)..."
                 aria-label="Término de búsqueda en NASA Earthdata"
-                className="w-full pl-3 pr-8 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:border-blue-600"
+                className="w-full pl-3 pr-8 py-1.5 text-xs bg-slate-950 border border-slate-700 text-slate-100 rounded focus:outline-none focus:border-cyan-500"
               />
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2" />
+              <Search className="w-3.5 h-3.5 text-slate-500 absolute right-2.5 top-2" />
             </div>
 
-            <label className="inline-flex items-center gap-1.5 text-xs text-slate-600 whitespace-nowrap cursor-pointer">
+            <label className="inline-flex items-center gap-1.5 text-xs text-slate-300 whitespace-nowrap cursor-pointer">
               <input
                 type="checkbox"
                 checked={cmrFiltrarPunto}
@@ -791,7 +789,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                   setCmrFiltrarPunto(next);
                   buscarCmr(cmrQuery, next, lat, lon);
                 }}
-                className="rounded border-slate-300 text-blue-600"
+                className="rounded border-slate-700 bg-slate-950 text-cyan-400"
               />
               Filtrar por punto
             </label>
@@ -799,23 +797,23 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
             <button
               type="submit"
               disabled={cargandoCmr}
-              className="px-3 py-1.5 text-xs font-medium text-slate-800 bg-slate-100 border border-slate-200 rounded hover:bg-slate-200 whitespace-nowrap shrink-0"
+              className="px-3 py-1.5 text-xs font-medium text-slate-100 bg-slate-950 border border-slate-700 rounded hover:border-cyan-500/50 whitespace-nowrap shrink-0"
             >
               {cargandoCmr ? 'Buscando...' : 'Buscar'}
             </button>
           </form>
 
           {errorCmr && (
-            <div className="text-xs text-rose-700">{errorCmr}</div>
+            <div className="text-xs text-rose-400">{errorCmr}</div>
           )}
 
-          <div className="text-[11px] font-mono tabular-nums text-slate-500">
+          <div className="text-[11px] font-mono tabular-nums text-slate-400">
             {cmrHits.toLocaleString('es-ES')} colecciones coincidentes en CMR
           </div>
 
-          <div className="flex-1 divide-y divide-slate-100 border border-slate-200 rounded-md overflow-hidden">
+          <div className="flex-1 divide-y divide-slate-800 border border-slate-800 bg-[#07090E] rounded-md overflow-hidden">
             {cmrResultados.length === 0 && !cargandoCmr ? (
-              <div className="p-4 text-xs text-slate-500">
+              <div className="p-4 text-xs text-slate-400">
                 No se encontraron colecciones con ese filtro. Prueba un término más
                 amplio como «MERRA-2» o «MODIS».
               </div>
@@ -823,18 +821,18 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
               cmrResultados.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3 hover:bg-slate-50 transition-colors flex items-start justify-between gap-3"
+                  className="p-3 hover:bg-slate-900/60 transition-colors flex items-start justify-between gap-3"
                 >
                   <div className="min-w-0">
                     <a
                       href={item.earthdataUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs font-semibold text-slate-900 hover:text-blue-700 line-clamp-1"
+                      className="text-xs font-semibold text-slate-100 hover:text-cyan-300 line-clamp-1"
                     >
                       {item.title}
                     </a>
-                    <div className="mt-0.5 text-[11px] font-mono text-slate-500 flex flex-wrap items-center gap-1.5">
+                    <div className="mt-0.5 text-[11px] font-mono text-slate-400 flex flex-wrap items-center gap-1.5">
                       <span>{item.shortName || item.id}</span>
                       {item.versionId && (
                         <>
@@ -854,7 +852,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                     href={item.earthdataUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] font-medium text-blue-700 hover:underline whitespace-nowrap shrink-0 mt-0.5"
+                    className="text-[11px] font-medium text-cyan-400 hover:underline whitespace-nowrap shrink-0 mt-0.5"
                   >
                     Ver gránulos
                   </a>
@@ -866,21 +864,21 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
       </div>
 
       {/* Subpanel: Contexto geográfico en vivo con Google Maps Grounding */}
-      <div className="border-t border-slate-200 p-5 bg-slate-50/50 space-y-3">
+      <div className="border-t border-slate-800 p-5 bg-[#0B0E17] space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-blue-700" />
+            <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-1.5">
+              <MapPin className="w-4 h-4 text-cyan-400" />
               Contexto geográfico con Google Maps Grounding
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               Consulta lugares, accesos logísticos, estaciones científicas y
               reseñas reales ancladas a las coordenadas actuales ({lat.toFixed(2)}°,{' '}
               {lon.toFixed(2)}°).
             </p>
           </div>
           <span className="text-[11px] font-mono tabular-nums text-slate-500">
-            Modelo: gemini-4-hydrogen · toolConfig.latLng
+            toolConfig.latLng · Google Maps Grounding
           </span>
         </div>
 
@@ -897,21 +895,21 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
             onChange={(e) => setMapsQuery(e.target.value)}
             placeholder="Ej. Estaciones de campo, accesos o puntos de interés geológico cercanos..."
             aria-label="Consulta para Google Maps Grounding"
-            className="flex-1 min-w-[240px] px-3 py-1.5 text-xs bg-white border border-slate-300 rounded focus:outline-none focus:border-blue-600"
+            className="flex-1 min-w-[240px] px-3 py-1.5 text-xs bg-slate-950 border border-slate-700 text-slate-100 rounded focus:outline-none focus:border-cyan-500"
           />
           <button
             type="button"
             onClick={usarMiUbicacionMaps}
             disabled={mapsLoading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded hover:bg-slate-50 whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-950 border border-slate-700 rounded hover:border-cyan-500/40 whitespace-nowrap shrink-0"
           >
-            <Compass className="w-3.5 h-3.5 text-slate-600" />
+            <Compass className="w-3.5 h-3.5 text-slate-400" />
             Usar mi ubicación
           </button>
           <button
             type="submit"
             disabled={mapsLoading}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-blue-700 rounded hover:bg-blue-800 disabled:opacity-60 whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-slate-950 bg-cyan-400 rounded hover:bg-cyan-300 disabled:opacity-60 whitespace-nowrap shrink-0"
           >
             <MapPin className="w-3.5 h-3.5" />
             {mapsLoading ? 'Consultando Maps...' : 'Consultar Google Maps'}
@@ -919,50 +917,50 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
         </form>
 
         {geoStatus && (
-          <div className="text-[11px] font-mono tabular-nums text-emerald-700">
+          <div className="text-[11px] font-mono tabular-nums text-emerald-400">
             {geoStatus}
           </div>
         )}
 
         {mapsError && (
-          <div className="p-3 text-xs text-rose-800 bg-rose-50 border border-rose-200 rounded-md">
+          <div className="p-3 text-xs text-rose-300 bg-rose-950/40 border border-rose-800/60 rounded-md">
             {mapsError}
           </div>
         )}
 
         {mapsResult && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-1">
-            <div className="lg:col-span-7 bg-white border border-slate-200 rounded-md p-4 space-y-2">
-              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                <span className="text-xs font-semibold text-slate-800">
+            <div className="lg:col-span-7 bg-[#07090E] border border-slate-800 rounded-md p-4 space-y-2">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                <span className="text-xs font-semibold text-slate-200">
                   Síntesis territorial verificada
                 </span>
-                <span className="text-[11px] font-mono tabular-nums text-slate-500">
+                <span className="text-[11px] font-mono tabular-nums text-slate-400">
                   {mapsResult.lat !== null && mapsResult.lon !== null
                     ? `${mapsResult.lat.toFixed(2)}°, ${mapsResult.lon.toFixed(2)}°`
                     : 'Sin ancla'}
                 </span>
               </div>
-              <div className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap">
+              <div className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap">
                 {mapsResult.respuestaMarkdown}
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white border border-slate-200 rounded-md p-4 space-y-2.5">
-              <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                <span className="text-xs font-semibold text-slate-800">
+            <div className="lg:col-span-5 bg-[#07090E] border border-slate-800 rounded-md p-4 space-y-2.5">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2">
+                <span className="text-xs font-semibold text-slate-200">
                   Lugares y fuentes de Google Maps ({mapsResult.lugares.length})
                 </span>
               </div>
 
               {mapsResult.lugares.length === 0 ? (
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   La consulta no devolvió fichas individuales de Google Maps para
                   este punto remoto; prueba ampliar el radio o consultar el centro
                   poblado más cercano.
                 </p>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-800">
                   {mapsResult.lugares.map((lugar, idx) => (
                     <div
                       key={`${lugar.placeId ?? lugar.uri}-${idx}`}
@@ -973,22 +971,22 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                           href={lugar.uri}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs font-semibold text-blue-700 hover:underline inline-flex items-center gap-1"
+                          className="text-xs font-semibold text-cyan-400 hover:underline inline-flex items-center gap-1"
                         >
                           <span>{lugar.title}</span>
                           <ExternalLink className="w-3 h-3 shrink-0" />
                         </a>
                         {lugar.placeId && (
-                          <span className="text-[10px] font-mono text-slate-400 shrink-0">
+                          <span className="text-[10px] font-mono text-slate-500 shrink-0">
                             {lugar.placeId.slice(0, 12)}
                           </span>
                         )}
                       </div>
 
                       {lugar.reviewSnippets.length > 0 && (
-                        <div className="space-y-1 pl-2.5 border-l border-slate-200">
+                        <div className="space-y-1 pl-2.5 border-l border-slate-800">
                           {lugar.reviewSnippets.map((snippet, sIdx) => (
-                            <div key={sIdx} className="text-[11px] text-slate-600">
+                            <div key={sIdx} className="text-[11px] text-slate-400">
                               <p className="line-clamp-3">«{snippet.text}»</p>
                               <div className="mt-0.5 flex items-center gap-2 text-[10px] text-slate-500">
                                 {snippet.author && <span>— {snippet.author}</span>}
@@ -997,7 +995,7 @@ export const EarthdataPanel: React.FC<EarthdataPanelProps> = ({
                                     href={snippet.uri}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-700 hover:underline inline-flex items-center gap-0.5"
+                                    className="text-cyan-400 hover:underline inline-flex items-center gap-0.5"
                                   >
                                     Ver reseña en Google Maps
                                     <ExternalLink className="w-2.5 h-2.5" />
